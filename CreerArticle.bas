@@ -10,15 +10,15 @@ Dim identifiant As String, motDePasse As String, langue As String
 'motDePasse = "Heisenberg"
 'identifiant = "ng2b609"
 'motDePasse = "Dr210591"
-'identifiant = "ng2b23d"
-'motDePasse = "RPS08201"
+identifiant = "ng2b23d"
+motDePasse = "RPS08201"
 
-identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "RPS")
+'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "RPS")
 If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
     Exit Sub
 End If
 
-motDePasse = InputBox("Ecrivez votre mot de passe", "RPS")
+'motDePasse = InputBox("Ecrivez votre mot de passe", "RPS")
 If StrPtr(motDePasse) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
     Exit Sub
 End If
@@ -79,19 +79,19 @@ prepaPoint = ThisWorkbook.Name
 Workbooks(prepaPoint).Activate
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
 
-'Vérification
-If MsgBox("Avant continuer et créer des articles, vous avez déjà configurer le 'Niveaux Organization' pour Nantes ou Saint-Nazaire ?", vbYesNo + vbExclamation, "Niveaux de organization") = vbNo Then
-
-    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm01"
-    session.findById("wnd[0]").sendVKey 0
-    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = Workbooks(prepaPoint).Worksheets("PREPA SAP").Range("B" & 4).Value 'verifier avec le premier article
-    session.findById("wnd[0]/usr/cmbRMMG1-MBRSH").Key = "M" 'Branche
-    session.findById("wnd[0]/usr/cmbRMMG1-MTART").Key = "CMS"
-    session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
-    MsgBox "Si le site n'est pas correc, changez les informations, sauvegardez la modification et quittez la session sans enregistrer l'article."
-    Exit Sub
-    
-End If
+''Vérification
+'If MsgBox("Avant continuer et créer des articles, vous avez déjà configurer le 'Niveaux Organization' pour Nantes ou Saint-Nazaire ?", vbYesNo + vbExclamation, "Niveaux de organization") = vbNo Then
+'
+'    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm01"
+'    session.findById("wnd[0]").sendVKey 0
+'    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = Workbooks(prepaPoint).Worksheets("PREPA SAP").Range("B" & 4).Value 'verifier avec le premier article
+'    session.findById("wnd[0]/usr/cmbRMMG1-MBRSH").Key = "M" 'Branche
+'    session.findById("wnd[0]/usr/cmbRMMG1-MTART").Key = "CMS"
+'    session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
+'    MsgBox "Si le site n'est pas correc, changez les informations, sauvegardez la modification et quittez la session sans enregistrer l'article."
+'    Exit Sub
+'
+'End If
 
 For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
@@ -100,7 +100,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[0]").sendVKey 0
 
     Workbooks(prepaPoint).Activate
-    modele = ActiveSheet.Range("A" & i).Value '8MODELNENM
+    modele = ActiveSheet.Range("A" & i).Value '8MODELNENM ou (8MODELZ62M)
     article = ActiveSheet.Range("B" & i).Value
     designation = ActiveSheet.Range("C" & i).Value
 
@@ -123,14 +123,18 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     typeMagasin = ActiveSheet.Range("M" & i).Value 'NEN ou (Z62)
 
     'Configurer le niveau de organization (Nantes ou St Nazaire)
-'    session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
-'    session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = division 'Division
-'    session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin 'Magasin
-'    session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin 'Numero magasin
-'    session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin 'Type magasin
-'    session.findById("wnd[1]").sendVKey 4
-        
-    session.findById("wnd[0]/tbar[1]/btn[5]").press
+    session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
+    session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = "" 'Division
+    session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = "" 'Magasin
+    session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = "" 'Numero magasin
+    session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = "" 'Type magasin
+    session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = division
+    session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
+    session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
+    session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
+    'session.findById("wnd[1]").sendVKey 4
+    'session.findById("wnd[0]/tbar[1]/btn[5]").press 'ouvrir la selection des vues
+    session.findById("wnd[1]/tbar[0]/btn[5]").press
 
     'Effacer la selection
     '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(1).Selected = False
@@ -149,6 +153,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(15).Selected = True 'Comptabilité
     '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW/txtMSICHTAUSW-DYTXT[0,15]").SetFocus
     '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW/txtMSICHTAUSW-DYTXT[0,15]").caretPosition = 0
+    'session.findById("wnd[1]/tbar[0]/btn[0]").press 'Retour à la fenetre "Niveaux de organization"
     session.findById("wnd[1]/tbar[0]/btn[0]").press
 
 
