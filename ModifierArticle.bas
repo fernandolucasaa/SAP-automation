@@ -1,4 +1,6 @@
 Attribute VB_Name = "Module2"
+Option Explicit
+
 Sub modifierButton()
 
 UserForm1.Show
@@ -12,13 +14,13 @@ Unload UserForm1 'Fermer
 '_________________________________________________________________________________________________'
                     'Logon SAP
 'Variables
-Dim SapGui, Applic, Connection, session
+Dim SapGui, Applic, Connection, session, WSHShell
 Dim identifiant As String, motDePasse As String, langue As String
 
-identifiant = "ng2b609"
-motDePasse = "Dr210591"
-'identifiant = "ng2b23d"
-'motDePasse = "RPS08201"
+'identifiant = "ng2b609"
+'motDePasse = "Dr210591"
+identifiant = "ng2b23d"
+motDePasse = "RPS08201"
 
 'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "RPS")
 If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
@@ -77,17 +79,7 @@ session.findById("wnd[0]/usr/txtRSYST-LANGU").Text = langue
 session.findById("wnd[0]").sendVKey 0
 
 '_________________________________________________________________________________________________'
-'Vérification
-If MsgBox("Avant continuer, vous avez déjà configurer le 'Niveaux Organization' pour Nantes ou Saint-Nazaire ?", vbYesNo + vbExclamation, "Niveaux de organization") = vbNo Then
-
-    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm02"
-    session.findById("wnd[0]").sendVKey 0
-    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article
-    session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
-    MsgBox "Si le site n'est pas correc, changez les informations, sauvegardez la modification et quittez la session."
-    Exit Sub
-    
-End If
+                   'Modifier Article
 
 '-------- Barre de recherche --------
 session.findById("wnd[0]/tbar[0]/okcd").Text = "mm02"
@@ -95,8 +87,47 @@ session.findById("wnd[0]").sendVKey 0
 
 '-------- Modifier Article (Ecran initial) --------
 session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article
+'session.findById("wnd[0]/tbar[0]/btn[0]").press
+
+'Modifier l'article pour le site à Nantes ou à Saint Nazaire
+Dim division As String, magasin As String, numeroMagasin As String, typeMagasin As String
+Dim fichier As String, fin As Integer, i As Integer, flag As Integer
+
+fichier = ThisWorkbook.Name
+Workbooks(fichier).Activate
+fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
+flag = 0
+
+For i = 4 To fin
+    If ActiveSheet.Range("B" & i).Value = article Then
+        flag = 1
+        Exit For
+    End If
+Next i
+
+If flag = 0 Then
+    Exit Sub
+End If
+
+Workbooks(fichier).Activate
+division = ActiveSheet.Range("J" & i).Value 'NTF ou (NZF)
+magasin = ActiveSheet.Range("K" & i).Value 'NENM ou (Z62M)
+numeroMagasin = ActiveSheet.Range("L" & i).Value 'N18 ou (Z18)
+typeMagasin = ActiveSheet.Range("M" & i).Value 'NEN ou (Z62)
+
+'Configurer le niveau de organization (Nantes ou St Nazaire)
+session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
+session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = "" 'Division
+session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = "" 'Magasin
+session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = "" 'Numero magasin
+session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = "" 'Type magasin
+session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = division
+session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
+session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
+session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
 session.findById("wnd[0]/tbar[0]/btn[0]").press
-session.findById("wnd[0]/tbar[0]/btn[0]").press 'Selection des vues
+
+'Il faut selectionner les vues aussi ?
 
 Dim valeur As String
 
@@ -334,7 +365,7 @@ ElseIf optionChoisie = 10 Then 'Emplacement
     
     '-------- Modifier Article (MRP1, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    'session.findById("wnd[0]/tbar[1]/btn[18]").press 'pas necessaire ?
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
@@ -361,7 +392,7 @@ ElseIf optionChoisie = 10 Then 'Emplacement
 End If
 
 'Sauvegarder
-'Workbooks(prepaPoint).Save
+Workbooks(fichier).Save
 
 'Fermeture de la connexion
 If MsgBox("La modification des articles est fini. Voulez-vous fermer votre session SAP ?", vbYesNo, "RPS") = vbYes Then
