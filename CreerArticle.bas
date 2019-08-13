@@ -1,9 +1,11 @@
 Attribute VB_Name = "Module1"
+Option Explicit
+
 Sub creerArticles_SAP()
 '_________________________________________________________________________________________________'
                     'Logon SAP
 'Variables
-Dim SapGui, Applic, Connection, session
+Dim SapGui, Applic, Connection, session, WSHShell
 Dim identifiant As String, motDePasse As String, langue As String
 
 'identifiant = "SayMyName"
@@ -71,52 +73,36 @@ session.findById("wnd[0]").sendVKey 0
 
 '_________________________________________________________________________________________________'
                     'Creer une article
-Dim prepaPoint As String, article As String, modele As String, designation As String
+Dim fichier As String, article As String, modele As String, designation As String, i As Integer
 Dim fin As Integer, nouveaux As String
 
-prepaPoint = ThisWorkbook.Name
+fichier = ThisWorkbook.Name
 
-Workbooks(prepaPoint).Activate
+Workbooks(fichier).Activate
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
 
-''Vérification
-'If MsgBox("Avant continuer et créer des articles, vous avez déjà configurer le 'Niveaux Organization' pour Nantes ou Saint-Nazaire ?", vbYesNo + vbExclamation, "Niveaux de organization") = vbNo Then
-'
-'    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm01"
-'    session.findById("wnd[0]").sendVKey 0
-'    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = Workbooks(prepaPoint).Worksheets("PREPA SAP").Range("B" & 4).Value 'verifier avec le premier article
-'    session.findById("wnd[0]/usr/cmbRMMG1-MBRSH").Key = "M" 'Branche
-'    session.findById("wnd[0]/usr/cmbRMMG1-MTART").Key = "CMS"
-'    session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
-'    MsgBox "Si le site n'est pas correc, changez les informations, sauvegardez la modification et quittez la session sans enregistrer l'article."
-'    Exit Sub
-'
-'End If
-
-For i = 4 To fin 'Les deux premieres lignes sont des exemples
+'For i = 4 To fin 'Les deux premieres lignes sont des exemples
+For i = 8 To fin
 
     '-------- Barre de recherche --------
     session.findById("wnd[0]/tbar[0]/okcd").Text = "mm01"
     session.findById("wnd[0]").sendVKey 0
 
-    Workbooks(prepaPoint).Activate
+    Workbooks(fichier).Activate
     modele = ActiveSheet.Range("A" & i).Value '8MODELNENM ou (8MODELZ62M)
     article = ActiveSheet.Range("B" & i).Value
     designation = ActiveSheet.Range("C" & i).Value
-
 
     '-------- Créer article (Ecran initial) --------
     session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article 'Article
     session.findById("wnd[0]/usr/cmbRMMG1-MBRSH").Key = "M" 'Branche
     session.findById("wnd[0]/usr/cmbRMMG1-MTART").Key = "CMS" 'Type d'article (CMS - CMS)
     session.findById("wnd[0]/usr/ctxtRMMG1_REF-MATNR").Text = modele 'Modèle
-    '''session.findById("wnd[0]/usr/ctxtRMMG1_REF-MATNR").SetFocus
-    '''session.findById("wnd[0]/usr/ctxtRMMG1_REF-MATNR").caretPosition = 10
         
     'Créer l'article pour le site à Nantes ou à Saint Nazaire
     Dim division As String, magasin As String, numeroMagasin As String, typeMagasin As String
 
-    Workbooks(prepaPoint).Activate
+    Workbooks(fichier).Activate
     division = ActiveSheet.Range("J" & i).Value 'NTF ou (NZF)
     magasin = ActiveSheet.Range("K" & i).Value 'NENM ou (Z62M)
     numeroMagasin = ActiveSheet.Range("L" & i).Value 'N18 ou (Z18)
@@ -132,14 +118,9 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
     session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
     session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
-    'session.findById("wnd[1]").sendVKey 4
-    'session.findById("wnd[0]/tbar[1]/btn[5]").press 'ouvrir la selection des vues
     session.findById("wnd[1]/tbar[0]/btn[5]").press
 
     'Effacer la selection
-    '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(1).Selected = False
-    '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW/txtMSICHTAUSW-DYTXT[0,1]").SetFocus
-    '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW/txtMSICHTAUSW-DYTXT[0,1]").caretPosition = 0
     session.findById("wnd[1]/tbar[0]/btn[19]").press
 
     'Sélection des vues
@@ -151,21 +132,15 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(12).Selected = True 'Données gén. div./stockage
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(13).Selected = True 'Gestion emplacements magasin
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(15).Selected = True 'Comptabilité
-    '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW/txtMSICHTAUSW-DYTXT[0,15]").SetFocus
-    '''session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW/txtMSICHTAUSW-DYTXT[0,15]").caretPosition = 0
     'session.findById("wnd[1]/tbar[0]/btn[0]").press 'Retour à la fenetre "Niveaux de organization"
     session.findById("wnd[1]/tbar[0]/btn[0]").press
 
-
     '-------- Créer article (Données de base, CMS - CMS) --------
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text = designation 'Désignation article
-    '''session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").SetFocus
-    '''session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").caretPosition = 0
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-
     '-------- Créer article (Achats, CMS - CMS) --------
-    Workbooks(prepaPoint).Activate
+    Workbooks(fichier).Activate
     Dim grpAcheteurs As String, tempsReception As String, numFabricant As String
     grpAcheteurs = ActiveSheet.Range("R" & i).Value 'BF1 ou (CIG)
     tempsReception = ActiveSheet.Range("Y" & i).Value '2
@@ -175,24 +150,20 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARC-EKGRP").Text = grpAcheteurs 'Groupe d'acheteurs
     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2303/txtMARC-WEBAZ").Text = tempsReception 'Temps de réception
     session.findById("wnd[0]/usr/subSUB11:SAPLMGD1:2312/txtMARA-MFRPN").Text = numFabricant 'N° pce fabricant
-    '''session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2303/txtMARC-WEBAZ").SetFocus
-    '''session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2303/txtMARC-WEBAZ").caretPosition = 1
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     session.findById("wnd[0]").sendVKey 0
 
-
     '-------- Créer article (Texte de commande, CMS - CMS) --------
-    Workbooks(prepaPoint).Activate
+    Workbooks(fichier).Activate
     Dim texteCommande As String
     texteCommande = ActiveSheet.Range("D" & i).Value
 
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text = texteCommande + vbCr + "" + vbCr + "" 'Texte de commande
+    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text = texteCommande 'Texte de commande
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").setSelectionIndexes 6, 6
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-
     '-------- Créer article (MRP 1, CMS - CMS) --------
-    Workbooks(prepaPoint).Activate
+    Workbooks(fichier).Activate
     Dim statutArt As String, typePlanif As String, ptCommande As String, valeurArrondie As String, delaiLivrai As String
     Dim gestionnaire As String, magasinProd As String, magApproExt As String, cleCalcTailleLot As String, cleHorizon As String
 
@@ -209,16 +180,8 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2481/ctxtMARC-MMSTA").Text = statutArt 'Statut art. par div.
     session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = typePlanif 'Type planification
-
-    'If (typePlanif = "VB") Then 'Si stock mini
-        session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/txtMARC-MINBE").Text = ptCommande 'Point de commande
-    'End If
-
+    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/txtMARC-MINBE").Text = ptCommande 'Point de commande
     session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISPO").Text = gestionnaire 'Gestionnaire
-
-    'If (typePlanif = "VB") Then
-    '    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTRF").Text = valeurArrondie 'Valeur arrondie  'premiere version : que valeur arrondie
-    'End If
 
     If (cleCalcTailleLot = "FX") Then 'St Nazaire
         session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTFE").Text = valeurArrondie '(Taille de lot fixe)
@@ -228,26 +191,20 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
     If (typePlanif = "VB") Then
         session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = cleCalcTailleLot 'Clé calc. taille lot
-        'session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTMI").Text = "41" 'Taille lot minimale
-        'session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTMA").Text = "42" 'Taille lot maximale
-        'session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTFE").Text = "43" 'Taille de lot fixe
     End If
 
     session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2484/ctxtMARC-LGPRO").Text = magasinProd 'Magasin production
     session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2484/ctxtMARC-LGFSB").Text = magApproExt 'Mag. pour appro. ext
     session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/txtMARC-PLIFZ").Text = delaiLivrai 'Délai prév. livrais
     session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = cleHorizon 'Clé d'horizon
-    '''session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").SetFocus
-    '''session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").caretPosition = 3
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     session.findById("wnd[0]").sendVKey 0
 
-
     '-------- Créer article (MRP 2, CMS - CMS) --------
-    Workbooks(prepaPoint).Activate
+    Workbooks(fichier).Activate
     Dim controleDispo As String, indivCollect As String
 
-    controleDispo = ActiveSheet.Range("AB" & i).Value 'KP ou (O2)
+    controleDispo = ActiveSheet.Range("AB" & i).Value 'KP ou (02)
     indivCollect = ActiveSheet.Range("AC" & i).Value '2
     
     If (division = "NTF") Then 'Nantes, le control disponibil. pour St Nazaire est deja rempli
@@ -257,17 +214,13 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").caretPosition = 2 'ligne ajoutée, car il avait de bug quand VB
     session.findById("wnd[0]").sendVKey 0 'ligne ajoutée, car il avait de bug quand VB
     session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2495/ctxtMARC-SBDKZ").Text = indivCollect 'Individuel/Collectif
-    '''session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2495/ctxtMARC-SBDKZ").SetFocus
-    '''session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2495/ctxtMARC-SBDKZ").caretPosition = 1
     session.findById("wnd[0]/tbar[1]/btn[18]").press
-
 
     '-------- Créer article (Donnéees gén. div./stockage, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-
     '-------- Créeer article (Gestion emplacements magasin, CMS - CMS) --------
-    Workbooks(prepaPoint).Activate
+    Workbooks(fichier).Activate
     Dim typeMagSM As String, typeMagEM As String
 
     typeMagSM = ActiveSheet.Range("AE" & i).Value 'NEN ou (Z62)
@@ -275,10 +228,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZA").Text = typeMagSM 'Type magasin pour SM
     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZE").Text = typeMagEM 'Type magasin EM
-    'session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZA").SetFocus
-    'session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZA").caretPosition = 3
     session.findById("wnd[0]/tbar[1]/btn[18]").press
-
 
     '-------- Créer article (Comptabilité, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[26]").press
@@ -300,12 +250,12 @@ Next i
 MsgBox ("La création des articles est fini." & Chr(13) & "Les articles suivants ont été créés : " & nouveaux)
 
 'Vider les cellules
-Workbooks(prepaPoint).Activate
+Workbooks(fichier).Activate
 ActiveSheet.Range("B4:I" & fin).ClearContents
 ActiveSheet.Range("V4:V" & fin).ClearContents
 
 'Sauvegarder
-'Workbooks(prepaPoint).Save
+Workbooks(fichier).Save
 
 'Fermeture de la connexion
 If MsgBox("La création des articles est fini. Voulez-vous fermer votre session SAP ?", vbYesNo, "RPS") = vbYes Then
