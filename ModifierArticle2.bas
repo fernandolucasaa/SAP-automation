@@ -79,13 +79,13 @@ Dim fichier As String, fin As String
 fichier = ThisWorkbook.Name
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
 
-premier = Selection.Row
-dernier = Selection.Rows.Count + premier - 1
+'premier = Selection.Row
+'dernier = Selection.Rows.Count + premier - 1
 
-Load UserForm2 'creer l'UserForm, mais par le montrer
+Load UserForm2 'creer l'UserForm, mais par l'afficher
 
-For i = premier To dernier
-'For i = 4 to fin
+'For i = premier To dernier
+For i = 4 To fin
 
     Workbooks(fichier).Activate
     article = ActiveSheet.Range("B" & i).Value
