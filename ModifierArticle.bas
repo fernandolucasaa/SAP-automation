@@ -1,74 +1,12 @@
 Attribute VB_Name = "Module2"
 Option Explicit
 
+Global session
+
 Sub modifierArticle()
 
-'_________________________________________________________________________________________________'
-                    'Logon SAP
-'Variables
-Dim SapGui, Applic, Connection, session, WSHShell
-Dim identifiant As String, motDePasse As String, langue As String
-
-identifiant = "ng2b609"
-motDePasse = "Dr210591"
-'identifiant = "ng2b23d"
-'motDePasse = "RPS08201"
-
-'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "RPS")
-If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-    Exit Sub
-End If
-
-'motDePasse = InputBox("Ecrivez votre mot de passe", "RPS")
-If StrPtr(motDePasse) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-    Exit Sub
-End If
-
-langue = "FR"
-
-Shell ("C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplogon.exe")
-
-Set WSHShell = CreateObject("WScript.Shell")
-
-Do Until WSHShell.AppActivate("SAP Logon") 'Attendre SAP ouvrir
-    Application.Wait Now + TimeValue("0:00:01")
-Loop
-
-Set SapGui = GetObject("SAPGUI") 'get the interface of the SAPGUI object
-
-If Not IsObject(SapGui) Then
-    Exit Sub
-End If
-
-Set Applic = SapGui.GetScriptingEngine 'get the interface of the currently running SAP GUI process
-
-If Not IsObject(Applic) Then
-    Exit Sub
-End If
-
-Set Connection = Applic.openconnection("..SAP2000 Production             PGI")
-
-If Not IsObject(Connection) Then
-   Exit Sub
-End If
-
-Set session = Connection.Children(0)
-If Connection.Children.Count < 1 Then
-    Exit Sub
-Else
-    Set session = Connection.Children(0)
-End If
-
-If Not IsObject(session) Then
-   Exit Sub
-End If
-
-session.findById("wnd[0]").maximize
-session.findById("wnd[0]/usr/txtRSYST-BNAME").Text = identifiant
-session.findById("wnd[0]/usr/pwdRSYST-BCODE").Text = motDePasse
-
-session.findById("wnd[0]/usr/txtRSYST-LANGU").Text = langue
-session.findById("wnd[0]").sendVKey 0
+'Se connecter au SAP
+logonSAP
 
 '_________________________________________________________________________________________________'
                    'Modifier Article
@@ -152,8 +90,20 @@ ElseIf UserForm1.OptionButton3 = True Then 'Statut art. par div.
     valeur = InputBox("Le statut art. par div. du article " & article & " est : " & statutArt & Chr(13) & "Ecrivez le nouveau valeur : ")
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2481/ctxtMARC-MMSTA").Text = valeur
 
-    GoSub Enregistrer
-
+    '[BUG]
+    'typePlan = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
+    End If
+    
+'    '[BUG]
+'    If (typePlan = "ND") Then
+'        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
+'        session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+'    End If
+    
 ElseIf UserForm1.OptionButton4 = True Then 'Type planification
     
     GoSub MRP1
@@ -183,14 +133,11 @@ ElseIf UserForm1.OptionButton4 = True Then 'Type planification
         End Select
     End If
     
-    GoSub Enregistrer
-    
     '[BUG]
-    'Une fois qu'on change le VB pour ND, quand on veut enregistrer, il y a une message differente,
-    'donc, quand on fait le retour on ouvre une fenetre pour quitter
-    If (valeur = "ND") Then
-        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
-        session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
     End If
 
 ElseIf UserForm1.OptionButton5 = True Then 'Point de commande
@@ -204,16 +151,10 @@ ElseIf UserForm1.OptionButton5 = True Then 'Point de commande
     session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/txtMARC-MINBE").Text = valeur
     
     '[BUG]
-    typePlan = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text
-
-    GoSub Enregistrer
-    
-    '[BUG]
-    'Même avertissement indiqué dessus, une fois que on est dans MRP1 et on a VB
-    'une fenetre est ouverte apres essayer de quitter l'opération
-    If (typePlan = "ND") Then
-        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
-        session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
     End If
          
 ElseIf UserForm1.OptionButton6 = True Then 'Valeur arrondie
@@ -225,16 +166,12 @@ ElseIf UserForm1.OptionButton6 = True Then 'Valeur arrondie
     valeurArrondie = session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTRF").Text
     valeur = InputBox("Le valeur arrondie du article " & article & " est : " & valeurArrondie & Chr(13) & "Ecrivez le nouveau valeur : ")
     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTRF").Text = valeur
-
-    '[BUG]
-    typePlan = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text
-    
-    GoSub Enregistrer
     
     '[BUG]
-    If (typePlan = "ND") Then
-        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
-        session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
     End If
 
 ElseIf UserForm1.OptionButton7 = True Then 'Délai livrai
@@ -246,16 +183,12 @@ ElseIf UserForm1.OptionButton7 = True Then 'Délai livrai
     delaiLivrai = session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/txtMARC-PLIFZ").Text
     valeur = InputBox("Le delai livrais du article " & article & " est : " & delaiLivrai & Chr(13) & "Ecrivez le nouveau valeur : ")
     session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/txtMARC-PLIFZ").Text = valeur
-
-    '[BUG]
-    typePlan = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text
-
-    GoSub Enregistrer
     
     '[BUG]
-    If (typePlan = "ND") Then
-        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
-        session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
     End If
 
 ElseIf UserForm1.OptionButton8 = True Then 'Clé calc. taille lot
@@ -289,12 +222,11 @@ ElseIf UserForm1.OptionButton8 = True Then 'Clé calc. taille lot
         End Select
     End If
     
-    GoSub Enregistrer
-    
     '[BUG]
-    If (typePlan = "ND") Then
-        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
-        session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
     End If
 
 ElseIf UserForm1.OptionButton9 = True Then 'Numéro pce. fabricant
@@ -311,44 +243,55 @@ ElseIf UserForm1.OptionButton9 = True Then 'Numéro pce. fabricant
     
 ElseIf UserForm1.OptionButton10 = True Then 'Emplacement
     
-    GoSub GestionEmplacementsMagasin
+    GoSub DonneesGenDivStockage
     
-    '-------- Gestion emplacements Masagin (CMS - CMS) --------
+    '-------- Modifier Article (Données gén. div./stockage, CMS - CMS) --------
     Dim emplacement As String
     emplacement = session.findById("wnd[0]/usr/subSUB5:SAPLMGD1:2734/ctxtMLGT-LGPLA").Text
     valeur = InputBox("L'emplacement du article " & article & " est : " & emplacement & Chr(13) & "Ecrivez le nouveau valeur : ")
+    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2701/txtMARD-LGPBE").Text = valeur
+    
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Continuer
+    
+    '-------- Modifier Article (Gestion emplacements Masagin, CMS - CMS) --------
     session.findById("wnd[0]/usr/subSUB5:SAPLMGD1:2734/ctxtMLGT-LGPLA").Text = valeur
 
     GoSub Enregistrer
 
-ElseIf UserForm1.OptionButton11 = True Then 'Grp Acheteur (Gestionnaire)
+ElseIf UserForm1.OptionButton11 = True Then 'Grp Acheteur
 
-    GoTo Achats
+    GoSub Achats
     
     '-------- Modifier Article (Achats, CMS - CMS) --------
     Dim grpAcheteurs As String
     grpAcheteurs = session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARC-EKGRP").Text
     valeur = InputBox("Le groupe acheteur du article " & article & " est : " & grpAcheteurs & Chr(13) & "Ecrivez le nouveau valeur : ")
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARC-EKGRP").Text = grpAcheteurs
+    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARC-EKGRP").Text = valeur
 
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
         session.findById("wnd[0]").Close
         session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
         Exit Sub
     End If
+    
+    GoSub Enregistrer
+    
+ElseIf UserForm1.OptionButton17 = True Then 'Gestionnaire
 
-    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Continuer
-
-    '-------- Modifier Article (Texte de commande, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-
+    GoSub MRP1
+    
     '-------- Modifier Article (MRP1, CMS - CMS) --------
     Dim gestionnaire As String
     gestionnaire = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISPO").Text
     valeur = InputBox("Le gestionnaire du article " & article & " est : " & gestionnaire & Chr(13) & "Ecrivez le nouveau valeur : ")
-    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISPO").Text = gestionnaire
-
-    GoSub Enregistrer
+    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISPO").Text = valeur
+    
+    '[BUG]
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
+    End If
 
 ElseIf UserForm1.OptionButton12 = True Then 'Cle Horizon
 
@@ -358,9 +301,14 @@ ElseIf UserForm1.OptionButton12 = True Then 'Cle Horizon
     Dim cleHorizon As String
     cleHorizon = session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text
     valeur = InputBox("La clé horizon du article " & article & " est : " & cleHorizon & Chr(13) & "Ecrivez le nouveau valeur : ")
-    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = cleHorizon
-
-    GoSub Enregistrer
+    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = valeur
+    
+    '[BUG]
+    If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        GoSub Enregistrer2
+    Else
+        GoSub Enregistrer
+    End If
 
 ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
 
@@ -368,7 +316,7 @@ ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
     Dim grpMarchandise As String
     grpMarchandise = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2001/ctxtMARA-MATKL").Text
     valeur = InputBox("Le groupe merchandise du article " & article & " est : " & grpMarchandise & Chr(13) & "Ecrivez le nouveau valeur : ")
-    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2001/ctxtMARA-MATKL").Text = grpMarchandise
+    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2001/ctxtMARA-MATKL").Text = valeur
 
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
         session.findById("wnd[0]").Close
@@ -379,9 +327,7 @@ ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
     session.findById("wnd[0]/tbar[1]/btn[18]").press 'Continuer
 
     '-------- Modifier Article (Achats, CMS - CMS) --------
-    grpMarchandise = session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARA-MATKL").Text
-    valeur = InputBox("Le groupe merchandise du article " & article & " est : " & grpMarchandise & Chr(13) & "Ecrivez le nouveau valeur : ")
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARA-MATKL").Text = grpMarchandise
+    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARA-MATKL").Text = valeur
 
     GoSub Enregistrer
     
@@ -393,7 +339,7 @@ ElseIf UserForm1.OptionButton14 = True Then 'Controle Dispo
     Dim controleDispo As String
     controleDispo = session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").Text
     valeur = InputBox("Le controle disponibil. du article " & article & " est : " & controleDispo & Chr(13) & "Ecrivez le nouveau valeur : ")
-    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").Text = controleDispo
+    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").Text = valeur
 
     GoSub Enregistrer
 
@@ -401,7 +347,7 @@ ElseIf UserForm1.OptionButton15 = True Then 'Type magasin pour SM
 
     GoSub GestionEmplacementsMagasin
     
-    '-------- Gestion emplacements Masagin (CMS - CMS) --------
+    '-------- Modifier Article (Gestion emplacements Masagin, CMS - CMS) --------
     Dim typeMagSM As String
     typeMagSM = session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZA").Text
     valeur = InputBox("Le type magasin pour SM du article " & article & " est : " & typeMagSM & Chr(13) & "Ecrivez le nouveau valeur : ")
@@ -413,7 +359,7 @@ ElseIf UserForm1.OptionButton16 = True Then 'Type magasin EM
 
     GoSub GestionEmplacementsMagasin
     
-    '-------- Gestion emplacements Masagin (CMS - CMS) --------
+    '-------- Modifier Article (Gestion emplacements Masagin, CMS - CMS) --------
     Dim typeMagEM As String
     typeMagEM = session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZE").Text
     valeur = InputBox("Le type magasin EM du article " & article & " est : " & typeMagEM & Chr(13) & "Ecrivez le nouveau valeur : ")
@@ -438,11 +384,25 @@ Exit Sub
 
 Enregistrer:
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-        session.findById("wnd[0]").Close
-        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
+        session.findById("wnd[0]").Close 'Fermer session
+        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press 'Confirmer fermeture
         Exit Sub
     End If
     
+    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder (on retourne à l'ecran initial)
+    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    
+    Return  'Retour
+
+'[BUG]
+Enregistrer2:
+    If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
+        session.findById("wnd[0]").Close 'Fermer session
+        session.findById("wnd[1]/usr/btnSPOP-OPTION1").press 'Confirmer fermeture
+        Exit Sub
+    End If
+    
+    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder
     session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder (on retourne à l'ecran initial)
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
     
@@ -476,37 +436,29 @@ MRP1:
     Return  'Retour
 
 MRP2:
-    '-------- Modifier Article (Données de base, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    
-    '-------- Modifier Article (Achats, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    
-    '-------- Modifier Article (Texte de commande, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    GoSub MRP1
     
     '-------- Modifier Article (MRP1, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    
-    Return  'Retour
-     
-GestionEmplacementsMagasin:
-    '-------- Modifier Article (Données de base, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    
-    '-------- Modifier Article (Achats, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    
-    '-------- Modifier Article (Texte de commande, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    
-    '-------- Modifier Article (MRP1, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    '[BUG]
-    'Si on a "ND", avant executer une action, il y a une message
+
+    'Si on a "ND", il y a une étape de plus, une message est affichée
     If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
         session.findById("wnd[0]/tbar[1]/btn[18]").press
     End If
+    
+    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    
+    Return  'Retour
+
+DonneesGenDivStockage:
+    GoSub MRP2
+    
+    '-------- Modifier Article (MRP2, CMS - CMS) --------
+    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    
+    Return
+
+GestionEmplacementsMagasin:
+    GoSub MRP2
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
