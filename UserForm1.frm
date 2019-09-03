@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1
    ClientLeft      =   45
    ClientTop       =   390
    ClientWidth     =   7380
-   OleObjectBlob   =   "UserForm1_30-08.frx":0000
+   OleObjectBlob   =   "UserForm1_02-09.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "UserForm1"
@@ -22,10 +22,9 @@ End Sub
 Private Sub CommandButton2_Click() 'Cancel
 
 Unload Me
-
-End Sub
-
-Private Sub Label2_Click()
+MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermé !")
+fermetureSAP
+End
 
 End Sub
 
@@ -45,15 +44,21 @@ OptionButton10.Value = False
 OptionButton11.Value = False
 OptionButton12.Value = False
 OptionButton13.Value = False
+OptionButton14.Value = False
+OptionButton15.Value = False
+OptionButton16.Value = False
+OptionButton17.Value = False
 
 TextBox1.SetFocus
 
 End Sub
 
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
-    
-MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermé !")
-fermetureSAP
-End
+
+If (CloseMode = vbformcontrlmenu) Then 'Finir l'opération si fermer le formulaire
+    MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermée !")
+    fermetureSAP
+    End
+End If
 
 End Sub
