@@ -1,4 +1,8 @@
 Attribute VB_Name = "connexionSAP"
+Option Explicit
+
+Global session
+
 Sub logonSAP()
 '_________________________________________________________________________________________________'
                     'Logon SAP
@@ -6,18 +10,18 @@ Sub logonSAP()
 Dim SapGui, Applic, Connection, WSHShell
 Dim identifiant As String, motDePasse As String, langue As String
 
-'identifiant = "ng2b609"
-'motDePasse = "Dr210591"
-identifiant = "ng2b23d"
-motDePasse = "RPS08201"
+identifiant = "ng2b609"
+motDePasse = "Dr210591"
+'identifiant = "ng2b23d"
+'motDePasse = "RPS08201"
 
-'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "RPS")
+'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "Connexion SAP")
 If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenêtre
     MsgBox ("Vous avez annulé l'opération !")
     End 'Arrête tous les procedures en exécution
 End If
 
-'motDePasse = InputBox("Ecrivez votre mot de passe", "RPS")
+'motDePasse = InputBox("Ecrivez votre mot de passe", "Connexion SAP")
 If StrPtr(motDePasse) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenêtre
     MsgBox ("Vous avez annulé l'opération !")
     End
@@ -73,7 +77,7 @@ End Sub
 
 Sub fermetureSAP()
 
-session.findById("wnd[0]").Close
-session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
+session.findById("wnd[0]").Close 'Fermer
+session.findById("wnd[1]/usr/btnSPOP-OPTION1").press 'Confirmer la fermeture
 
 End Sub
