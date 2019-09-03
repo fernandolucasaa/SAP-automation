@@ -2,89 +2,23 @@ Attribute VB_Name = "Module1"
 Option Explicit
 
 Sub creerArticles_SAP()
-''_________________________________________________________________________________________________'
-'                    'Logon SAP
-''Variables
-'Dim SapGui, Applic, Connection, session, WSHShell
-'Dim identifiant As String, motDePasse As String, langue As String
-'
-''identifiant = "SayMyName"
-''motDePasse = "Heisenberg"
-''identifiant = "ng2b609"
-''motDePasse = "Dr210591"
-''identifiant = "ng2b23d"
-''motDePasse = "RPS08201"
-'
-'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "RPS")
-'If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-'    Exit Sub
-'End If
-'
-'motDePasse = InputBox("Ecrivez votre mot de passe", "RPS")
-'If StrPtr(motDePasse) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-'    Exit Sub
-'End If
-'
-'langue = "FR"
-'
-'Shell ("C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplogon.exe")
-'
-'Set WSHShell = CreateObject("WScript.Shell")
-'
-'Do Until WSHShell.AppActivate("SAP Logon") 'Attendre SAP ouvrir
-'    Application.Wait Now + TimeValue("0:00:01")
-'Loop
-'
-'Set SapGui = GetObject("SAPGUI") 'get the interface of the SAPGUI object
-'
-'If Not IsObject(SapGui) Then
-'    Exit Sub
-'End If
-'
-'Set Applic = SapGui.GetScriptingEngine 'get the interface of the currently running SAP GUI process
-'
-'If Not IsObject(Applic) Then
-'    Exit Sub
-'End If
-'
-'Set Connection = Applic.openconnection("..SAP2000 Production             PGI")
-'
-'If Not IsObject(Connection) Then
-'   Exit Sub
-'End If
-'
-'Set session = Connection.Children(0)
-'If Connection.Children.Count < 1 Then
-'    Exit Sub
-'Else
-'    Set session = Connection.Children(0)
-'End If
-'
-'If Not IsObject(session) Then
-'   Exit Sub
-'End If
-'
-'session.findById("wnd[0]").maximize
-'session.findById("wnd[0]/usr/txtRSYST-BNAME").Text = identifiant
-'session.findById("wnd[0]/usr/pwdRSYST-BCODE").Text = motDePasse
-'
-'session.findById("wnd[0]/usr/txtRSYST-LANGU").Text = langue
-'session.findById("wnd[0]").sendVKey 0
-logonSAP
 
+'Se connecter au SAP
+logonSAP
 
 '_________________________________________________________________________________________________'
                     'Creer une article
 Dim fichier As String, article As String, modele As String, designation As String, i As Integer
-Dim fin As Integer, nouveaux As String
+Dim fin As Integer, nouveaux As String, compteur As Integer
 
 fichier = ThisWorkbook.Name
 
 Workbooks(fichier).Activate
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
+compteur = 0
 
-For i = 4 To fin 'Les deux premieres lignes sont des exemples
-'For i = 8 To fin
+'For i = 4 To fin 'Les deux premieres lignes sont des exemples
+For i = 9 To fin
 
     '-------- Barre de recherche --------
     session.findById("wnd[0]/tbar[0]/okcd").Text = "mm01"
@@ -161,7 +95,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     texteCommande = ActiveSheet.Range("D" & i).Value
 
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text = texteCommande 'Texte de commande
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").setSelectionIndexes 6, 6
+    'session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").setSelectionIndexes 6, 6
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
     '-------- Créer article (MRP 1, CMS - CMS) --------
@@ -242,6 +176,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
     'Article créee
     nouveaux = nouveaux & article & " "
+    compteur = compteur + 1
 
     'Retourner à l'accueil
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'buttom pour faire le retour
@@ -249,20 +184,19 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
 Next i
 
-MsgBox ("La création des articles est fini." & Chr(13) & "Les articles suivants ont été créés : " & nouveaux)
+MsgBox ("La création des articles est finie ! Vous avez crée " & compteur & " articles.")
 
 'Vider les cellules
-Workbooks(fichier).Activate
-ActiveSheet.Range("B4:I" & fin).ClearContents
-ActiveSheet.Range("V4:V" & fin).ClearContents
+'Workbooks(fichier).Activate
+'ActiveSheet.Range("B4:I" & fin).ClearContents
+'ActiveSheet.Range("V4:V" & fin).ClearContents
 
 'Sauvegarder
 Workbooks(fichier).Save
 
 'Fermeture de la connexion
-If MsgBox("La création des articles est fini. Voulez-vous fermer votre session SAP ?", vbYesNo, "RPS") = vbYes Then
-    session.findById("wnd[0]").Close
-    session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
+If MsgBox("Voulez-vous fermer votre session SAP ?", vbYesNo, "Fermeture de la session SAP") = vbYes Then
+    fermetureSAP
 End If
 
 End Sub
