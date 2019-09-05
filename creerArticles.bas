@@ -1,9 +1,9 @@
 Attribute VB_Name = "creerArticles"
 Option Explicit
 
-'Créer tous les article du fichier. L'utilisateur doit confirmer la bonne création des articles à
+'CrÃ©er tous les article du fichier. L'utilisateur doit confirmer la bonne crÃ©ation des articles Ã 
 'chaque n creations
-'Créer des articles pour Nantes et Saint-Nazaire
+'CrÃ©er des articles pour Nantes et Saint-Nazaire
 
 Sub creerArticles_SAP()
 
@@ -19,9 +19,9 @@ fichier = ThisWorkbook.Name
 
 Workbooks(fichier).Activate
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
-compteur = 0 'qté totale de articles crées
-cpt = 0 'qté avant de demander une vérification
-limite = 5 'demander à l'utilisateur de vérifier la création à chaque fois qu'on crée cette qté
+compteur = 0 'qtÃ© totale de articles crÃ©es
+cpt = 0 'qtÃ© avant de demander une vÃ©rification
+limite = 5 'demander Ã  l'utilisateur de vÃ©rifier la crÃ©ation Ã  chaque fois qu'on crÃ©e cette qtÃ©
 
 For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
@@ -34,13 +34,13 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     article = ActiveSheet.Range("B" & i).Value
     designation = ActiveSheet.Range("C" & i).Value
 
-    '-------- Créer article (Ecran initial) --------
+    '-------- CrÃ©er article (Ecran initial) --------
     session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article 'Article
     session.findById("wnd[0]/usr/cmbRMMG1-MBRSH").Key = "M" 'Branche
     session.findById("wnd[0]/usr/cmbRMMG1-MTART").Key = "CMS" 'Type d'article (CMS - CMS)
-    session.findById("wnd[0]/usr/ctxtRMMG1_REF-MATNR").Text = modele 'Modèle
+    session.findById("wnd[0]/usr/ctxtRMMG1_REF-MATNR").Text = modele 'ModÃ¨le
 
-    'Créer l'article pour le site à Nantes ou à Saint Nazaire
+    'CrÃ©er l'article pour le site Ã  Nantes ou Ã  Saint Nazaire
     Dim division As String, magasin As String, numeroMagasin As String, typeMagasin As String
 
     Workbooks(fichier).Activate
@@ -64,23 +64,23 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     'Effacer la selection
     session.findById("wnd[1]/tbar[0]/btn[19]").press
 
-    'Sélection des vues
-    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'Données de base
+    'SÃ©lection des vues
+    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'DonnÃ©es de base
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(5).Selected = True 'Achats
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(6).Selected = True 'Texte de commande
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(7).Selected = True 'MRP 1
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(8).Selected = True 'MRP 2
-    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(12).Selected = True 'Données gén. div./stockage
+    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(12).Selected = True 'DonnÃ©es gÃ©n. div./stockage
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(13).Selected = True 'Gestion emplacements magasin
-    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(15).Selected = True 'Comptabilité
-    'session.findById("wnd[1]/tbar[0]/btn[0]").press 'Retour à la fenetre "Niveaux de organization"
+    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(15).Selected = True 'ComptabilitÃ©
+    'session.findById("wnd[1]/tbar[0]/btn[0]").press 'Retour Ã  la fenetre "Niveaux de organization"
     session.findById("wnd[1]/tbar[0]/btn[0]").press
 
-    '-------- Créer article (Données de base, CMS - CMS) --------
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text = designation 'Désignation article
+    '-------- CrÃ©er article (DonnÃ©es de base, CMS - CMS) --------
+    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text = designation 'DÃ©signation article
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-    '-------- Créer article (Achats, CMS - CMS) --------
+    '-------- CrÃ©er article (Achats, CMS - CMS) --------
     Workbooks(fichier).Activate
     Dim grpAcheteurs As String, tempsReception As String, numFabricant As String
     grpAcheteurs = ActiveSheet.Range("R" & i).Value 'BF1 ou (CIG)
@@ -89,12 +89,12 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/chkMARC-KAUTB").Selected = True 'Cde automatique
     session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARC-EKGRP").Text = grpAcheteurs 'Groupe d'acheteurs
-    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2303/txtMARC-WEBAZ").Text = tempsReception 'Temps de réception
-    session.findById("wnd[0]/usr/subSUB11:SAPLMGD1:2312/txtMARA-MFRPN").Text = numFabricant 'N° pce fabricant
+    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2303/txtMARC-WEBAZ").Text = tempsReception 'Temps de rÃ©ception
+    session.findById("wnd[0]/usr/subSUB11:SAPLMGD1:2312/txtMARA-MFRPN").Text = numFabricant 'NÂ° pce fabricant
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     session.findById("wnd[0]").sendVKey 0
 
-    '-------- Créer article (Texte de commande, CMS - CMS) --------
+    '-------- CrÃ©er article (Texte de commande, CMS - CMS) --------
     Workbooks(fichier).Activate
     Dim texteCommande As String
     texteCommande = ActiveSheet.Range("D" & i).Value
@@ -103,7 +103,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     'session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").setSelectionIndexes 6, 6
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-    '-------- Créer article (MRP 1, CMS - CMS) --------
+    '-------- CrÃ©er article (MRP 1, CMS - CMS) --------
     Workbooks(fichier).Activate
     Dim statutArt As String, typePlanif As String, ptCommande As String, valeurArrondie As String, delaiLivrai As String
     Dim gestionnaire As String, magasinProd As String, magApproExt As String, cleCalcTailleLot As String, cleHorizon As String
@@ -131,17 +131,17 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     End If
 
     If (typePlanif = "VB") Then
-        session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = cleCalcTailleLot 'Clé calc. taille lot
+        session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = cleCalcTailleLot 'ClÃ© calc. taille lot
     End If
 
     session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2484/ctxtMARC-LGPRO").Text = magasinProd 'Magasin production
     session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2484/ctxtMARC-LGFSB").Text = magApproExt 'Mag. pour appro. ext
-    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/txtMARC-PLIFZ").Text = delaiLivrai 'Délai prév. livrais
-    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = cleHorizon 'Clé d'horizon
+    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/txtMARC-PLIFZ").Text = delaiLivrai 'DÃ©lai prÃ©v. livrais
+    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = cleHorizon 'ClÃ© d'horizon
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     session.findById("wnd[0]").sendVKey 0
 
-    '-------- Créer article (MRP 2, CMS - CMS) --------
+    '-------- CrÃ©er article (MRP 2, CMS - CMS) --------
     Workbooks(fichier).Activate
     Dim controleDispo As String, indivCollect As String
 
@@ -152,15 +152,15 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
         session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").Text = controleDispo 'Controle disponibil.
     End If
 
-    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").caretPosition = 2 'ligne ajoutée, car il avait de bug quand VB
-    session.findById("wnd[0]").sendVKey 0 'ligne ajoutée, car il avait de bug quand VB
+    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").caretPosition = 2 'ligne ajoutÃ©e, car il avait de bug quand VB
+    session.findById("wnd[0]").sendVKey 0 'ligne ajoutÃ©e, car il avait de bug quand VB
     session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2495/ctxtMARC-SBDKZ").Text = indivCollect 'Individuel/Collectif
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-    '-------- Créer article (Donnéees gén. div./stockage, CMS - CMS) --------
+    '-------- CrÃ©er article (DonnÃ©ees gÃ©n. div./stockage, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-    '-------- Créeer article (Gestion emplacements magasin, CMS - CMS) --------
+    '-------- CrÃ©eer article (Gestion emplacements magasin, CMS - CMS) --------
     Workbooks(fichier).Activate
     Dim typeMagSM As String, typeMagEM As String
 
@@ -171,7 +171,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZE").Text = typeMagEM 'Type magasin EM
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-    '-------- Créer article (Comptabilité, CMS - CMS) --------
+    '-------- CrÃ©er article (ComptabilitÃ©, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[26]").press
     session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2802/ctxtMBEW-BKLAS").Text = "0510" 'Classe valorisation
     session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2802/ctxtMBEW-BKLAS").caretPosition = 4
@@ -179,23 +179,23 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[0]").sendVKey 0
     session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
 
-    'Article créee
+    'Article crÃ©ee
     nouveaux = nouveaux & article & " "
     compteur = compteur + 1
     cpt = cpt + 1
 
-    'Retourner à l'accueil
+    'Retourner Ã  l'accueil
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'buttom pour faire le retour
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'buttom pour faire le retour
     
-    'Vérification manuelle de l'utilisateur
+    'VÃ©rification manuelle de l'utilisateur
     If (cpt = limite) Then
         
         'cpt = 0
-        MsgBox "Vous avez créé " & limite & " articles. Vérifiez si les articles sont corrects dans le SAP." _
-        & " Aprés finir votre vérification, laissez votre session SAP ouverte dans l'écran initial !", vbExclamation, _
+        MsgBox "Vous avez crÃ©Ã© " & limite & " articles. VÃ©rifiez si les articles sont corrects dans le SAP." _
+        & " AprÃ©s finir votre vÃ©rification, laissez votre session SAP ouverte dans l'Ã©cran initial !", vbExclamation, _
         "Verifiez des articles"
-        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, "Continuer opération")
+        Select Case MsgBox("Voulez-vous continuer la crÃ©ation des articles ?", vbYesNo + vbQuestion, "Continuer opÃ©ration")
             Case vbNo
                 Exit For
         End Select
@@ -204,7 +204,7 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
 Next i
 
-MsgBox ("La création des articles est finie ! Vous avez crée " & compteur & " articles.")
+MsgBox ("La crÃ©ation des articles est finie ! Vous avez crÃ©e " & compteur & " articles.")
 
 'Vider les cellules
 'Workbooks(fichier).Activate
