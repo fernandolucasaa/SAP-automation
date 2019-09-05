@@ -1,10 +1,13 @@
-Attribute VB_Name = "Module3"
+Attribute VB_Name = "modifierArticles"
 Option Explicit
+
+'Modifier tous les articles de ce fichier, à chaque fois l'utilisateur doit choisir quelle modification à faire
+'et quelle est la nouvelle valeur à mettre
+'Modifier les articles pour Nantes et Saint-Nazaire
 
 Sub modifierArticles2()
 
-'Se connecter au SAP
-logonSAP
+logonSAP 'Se connecter au SAP
 
 '_________________________________________________________________________________________________'
                     'Modifier Article
@@ -50,9 +53,9 @@ session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour (F3)
 session.findById("wnd[0]/tbar[0]/btn[3]").press
 
 compteur = 0
-'For i = 4 To fin
-For i = 4 To 6
-    
+
+For i = 4 To fin
+
     Workbooks(fichier).Activate
     article = ActiveSheet.Range("B" & i).Value
     
