@@ -1,5 +1,9 @@
-Attribute VB_Name = "Module1"
+Attribute VB_Name = "creerArticles"
 Option Explicit
+
+'Créer tous les article du fichier. L'utilisateur doit confirmer la bonne création des articles à
+'chaque n creations
+'Créer des articles pour Nantes et Saint-Nazaire
 
 Sub creerArticles_SAP()
 
@@ -9,16 +13,17 @@ logonSAP
 '_________________________________________________________________________________________________'
                     'Creer une article
 Dim fichier As String, article As String, modele As String, designation As String, i As Integer
-Dim fin As Integer, nouveaux As String, compteur As Integer
+Dim fin As Integer, nouveaux As String, compteur As Integer, cpt As Integer, limite As Integer
 
 fichier = ThisWorkbook.Name
 
 Workbooks(fichier).Activate
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
-compteur = 0
+compteur = 0 'qté totale de articles crées
+cpt = 0 'qté avant de demander une vérification
+limite = 5 'demander à l'utilisateur de vérifier la création à chaque fois qu'on crée cette qté
 
-'For i = 4 To fin 'Les deux premieres lignes sont des exemples
-For i = 9 To fin
+For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
     '-------- Barre de recherche --------
     session.findById("wnd[0]/tbar[0]/okcd").Text = "mm01"
@@ -34,7 +39,7 @@ For i = 9 To fin
     session.findById("wnd[0]/usr/cmbRMMG1-MBRSH").Key = "M" 'Branche
     session.findById("wnd[0]/usr/cmbRMMG1-MTART").Key = "CMS" 'Type d'article (CMS - CMS)
     session.findById("wnd[0]/usr/ctxtRMMG1_REF-MATNR").Text = modele 'Modèle
-        
+
     'Créer l'article pour le site à Nantes ou à Saint Nazaire
     Dim division As String, magasin As String, numeroMagasin As String, typeMagasin As String
 
@@ -142,11 +147,11 @@ For i = 9 To fin
 
     controleDispo = ActiveSheet.Range("AB" & i).Value 'KP ou (02)
     indivCollect = ActiveSheet.Range("AC" & i).Value '2
-    
+
     If (division = "NTF") Then 'Nantes, le control disponibil. pour St Nazaire est deja rempli
         session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").Text = controleDispo 'Controle disponibil.
     End If
-    
+
     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").caretPosition = 2 'ligne ajoutée, car il avait de bug quand VB
     session.findById("wnd[0]").sendVKey 0 'ligne ajoutée, car il avait de bug quand VB
     session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2495/ctxtMARC-SBDKZ").Text = indivCollect 'Individuel/Collectif
@@ -177,10 +182,25 @@ For i = 9 To fin
     'Article créee
     nouveaux = nouveaux & article & " "
     compteur = compteur + 1
+    cpt = cpt + 1
 
     'Retourner à l'accueil
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'buttom pour faire le retour
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'buttom pour faire le retour
+    
+    'Vérification manuelle de l'utilisateur
+    If (cpt = limite) Then
+        
+        'cpt = 0
+        MsgBox "Vous avez créé " & limite & " articles. Vérifiez si les articles sont corrects dans le SAP." _
+        & " Aprés finir votre vérification, laissez votre session SAP ouverte dans l'écran initial !", vbExclamation, _
+        "Verifiez des articles"
+        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, "Continuer opération")
+            Case vbNo
+                Exit For
+        End Select
+        
+    End If
 
 Next i
 
