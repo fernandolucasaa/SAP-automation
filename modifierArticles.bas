@@ -1,8 +1,8 @@
 Attribute VB_Name = "modifierArticles"
 Option Explicit
 
-'Modifier tous les articles de ce fichier, Ã  chaque fois l'utilisateur doit choisir quelle modification Ã  faire
-'et quelle est la nouvelle valeur Ã  mettre
+'Modifier tous les articles de ce fichier, à chaque fois l'utilisateur doit choisir quelle modification à faire
+'et quelle est la nouvelle valeur à mettre
 'Modifier les articles pour Nantes et Saint-Nazaire
 
 Sub modifierArticles2()
@@ -17,7 +17,7 @@ fichier = ThisWorkbook.Name
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
 
 Workbooks(fichier).Activate
-ref = 4 'RefÃ©rence pour sauvegarder le niveau de organization
+ref = 4 'Reférence pour sauvegarder le niveau de organization
 article = ActiveSheet.Range("B" & ref).Value
 
 '-------- Barre de recherche --------
@@ -27,7 +27,7 @@ session.findById("wnd[0]").sendVKey 0
 '-------- Modifier Article (Ecran initial) --------
 session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article
 
-'Modifier l'article pour le site Ã  Nantes ou Ã  Saint Nazaire
+'Modifier l'article pour le site à Nantes ou à Saint Nazaire
 Dim division As String, magasin As String, numeroMagasin As String, typeMagasin As String, valeur As String
 Dim typePlan As String, compteur As Integer
 
@@ -47,7 +47,7 @@ session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = division
 session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
 session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
 session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
-session.findById("wnd[1]/tbar[0]/btn[13]").press 'Sauvegarder comme paramÃ©trage
+session.findById("wnd[1]/tbar[0]/btn[13]").press 'Sauvegarder comme paramétrage
 
 session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour (F3)
 session.findById("wnd[0]/tbar[0]/btn[3]").press
@@ -59,9 +59,9 @@ For i = 4 To fin
     Workbooks(fichier).Activate
     article = ActiveSheet.Range("B" & i).Value
     
-    Load UserForm1 'crÃ©er l'UserForm, mais pas l'afficher
+    Load UserForm1 'créer l'UserForm, mais pas l'afficher
     UserForm1.TextBox1 = article
-    MsgBox ("Choisissez la modification Ã  faire !")
+    MsgBox ("Choisissez la modification à faire !")
     UserForm1.Show
     
     '-------- Barre de recherche --------
@@ -74,7 +74,7 @@ For i = 4 To fin
 
     If UserForm1.OptionButton1 = True Then 'Designation
         
-        '-------- Modifier Article (DonnÃ©es de base, CMS - CMS) --------
+        '-------- Modifier Article (Données de base, CMS - CMS) --------
         Dim designation As String
         designation = session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text
         valeur = InputBox("La designation du article " & article & " est : " & designation & Chr(13) _
@@ -125,12 +125,12 @@ For i = 4 To fin
         & "Ecrivez le nouveau type : ")
         session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = valeur
     
-        'Il faut verifier si on a la bonne clÃ© pour le nouveau type de planification
+        'Il faut verifier si on a la bonne clé pour le nouveau type de planification
         Dim cleCalcTailleLot As String
         cleCalcTailleLot = session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text
         
         If (valeur = "VB" And cleCalcTailleLot = "") Then
-            Select Case MsgBox("La clÃ© calc. taille lot n'est pas la bonnne pour le nouveau type 'VB'. Il faut la modifier !" _
+            Select Case MsgBox("La clé calc. taille lot n'est pas la bonnne pour le nouveau type 'VB'. Il faut la modifier !" _
             & " Voulez-vous modifier pour 'EX' ?", vbYesNo, "RPS")
                 Case vbYes
                     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = "EX"
@@ -138,7 +138,7 @@ For i = 4 To fin
         End If
         
         If (valeur = "ND" And cleCalcTailleLot = "EX") Then
-            Select Case MsgBox("La clÃ© calc. taille lot n'est pas la bonnne pour le nouveau type 'ND'. Voulez-vous modifier pour '' ?", vbYesNo, "RPS")
+            Select Case MsgBox("La clé calc. taille lot n'est pas la bonnne pour le nouveau type 'ND'. Voulez-vous modifier pour '' ?", vbYesNo, "RPS")
                 Case vbYes
                     session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = ""
             End Select
@@ -187,7 +187,7 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton7 = True Then 'DÃ©lai livrai
+    ElseIf UserForm1.OptionButton7 = True Then 'Délai livrai
     
         GoSub MRP1
         
@@ -205,21 +205,21 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton8 = True Then 'ClÃ© calc. taille lot
+    ElseIf UserForm1.OptionButton8 = True Then 'Clé calc. taille lot
     
         GoSub MRP1
     
         '-------- Modifier Article (MRP1, CMS - CMS) --------
         Dim cleCalcTailleLot2 As String
         cleCalcTailleLot2 = session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text
-        valeur = InputBox("La clÃ© calc. taille lot du article " & article & " est : " & cleCalcTailleLot2 & Chr(13) _
-        & "Ecrivez la nouvelle clÃ© : ")
+        valeur = InputBox("La clé calc. taille lot du article " & article & " est : " & cleCalcTailleLot2 & Chr(13) _
+        & "Ecrivez la nouvelle clé : ")
         session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = valeur
     
         typePlan = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text
     
         If (valeur = "" And typePlan = "VB") Then
-            Select Case MsgBox("Le type planication n'est pas le bon pour la nouvelle clÃ© ''. Il faut le modifier !" _
+            Select Case MsgBox("Le type planication n'est pas le bon pour la nouvelle clé ''. Il faut le modifier !" _
             & " Voulez-vous modifier pour 'ND' ?", vbYesNo, "RPS")
                 Case vbYes
                     session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND"
@@ -228,7 +228,7 @@ For i = 4 To fin
         End If
         
         If (valeur = "EX" And typePlan = "ND") Then
-            Select Case MsgBox("Le type planification n'est pas le bon pour la nouvelle clÃ© 'EX'. Il faut le modifier !" _
+            Select Case MsgBox("Le type planification n'est pas le bon pour la nouvelle clé 'EX'. Il faut le modifier !" _
             & " Voulez-vous modifier pour 'VB' ?", vbYesNo, "RPS")
                 Case vbYes
                     session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "VB"
@@ -243,15 +243,15 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton9 = True Then 'NumÃ©ro pce. fabricant
+    ElseIf UserForm1.OptionButton9 = True Then 'Numéro pce. fabricant
     
         GoSub Achats
         
         '-------- Modifier Article (Achats, CMS - CMS) --------
         Dim numFabricant As String
         numFabricant = session.findById("wnd[0]/usr/subSUB11:SAPLMGD1:2312/txtMARA-MFRPN").Text
-        valeur = InputBox("Le numÃ©ro pce fabricant du article " & article & " est : " & numFabricant & Chr(13) _
-        & "Ecrivez le nouveau numÃ©ro : ")
+        valeur = InputBox("Le numéro pce fabricant du article " & article & " est : " & numFabricant & Chr(13) _
+        & "Ecrivez le nouveau numéro : ")
         session.findById("wnd[0]/usr/subSUB11:SAPLMGD1:2312/txtMARA-MFRPN").Text = valeur
     
         GoSub Enregistrer
@@ -260,7 +260,7 @@ For i = 4 To fin
         
         GoSub DonneesGenDivStockage
         
-        '-------- Modifier Article (DonnÃ©es gÃ©n. div./stockage, CMS - CMS) --------
+        '-------- Modifier Article (Données gén. div./stockage, CMS - CMS) --------
         Dim emplacement As String
         emplacement = session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2701/txtMARD-LGPBE").Text
         valeur = InputBox("L'emplacement du article " & article & " est : " & emplacement & Chr(13) _
@@ -312,8 +312,8 @@ For i = 4 To fin
         '-------- Modifier Article (MRP1, CMS - CMS) --------
         Dim cleHorizon As String
         cleHorizon = session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text
-        valeur = InputBox("La clÃ© horizon du article " & article & " est : " & cleHorizon & Chr(13) _
-        & "Ecrivez la nouvelle clÃ© : ")
+        valeur = InputBox("La clé horizon du article " & article & " est : " & cleHorizon & Chr(13) _
+        & "Ecrivez la nouvelle clé : ")
         session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = valeur
         
         '[BUG]
@@ -325,7 +325,7 @@ For i = 4 To fin
 
     ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
     
-        '-------- Modifier Article (DonnÃ©es de base, CMS - CMS) --------
+        '-------- Modifier Article (Données de base, CMS - CMS) --------
         Dim grpMarchandise As String
         grpMarchandise = session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2001/ctxtMARA-MATKL").Text
         valeur = InputBox("Le groupe merchandise du article " & article & " est : " & grpMarchandise & Chr(13) _
@@ -333,7 +333,7 @@ For i = 4 To fin
         session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2001/ctxtMARA-MATKL").Text = valeur
     
         If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-            MsgBox ("Vous avez annulÃ© l'opÃ©ration ! La session SAP sera fermÃ© !")
+            MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermé !")
             Unload UserForm1
             fermetureSAP
             Exit Sub
@@ -395,7 +395,7 @@ Next i
 'Sauvegarder
 Workbooks(fichier).Save
 
-MsgBox ("Vous avez modifiÃ© " & compteur & " articles !")
+MsgBox ("Vous avez modifié " & compteur & " articles !")
 
 'Fermeture de la connexion
 If MsgBox("Voulez-vous fermer votre session SAP ?", vbYesNo, "Fermeture de la session SAP") = vbYes Then
@@ -406,39 +406,39 @@ Exit Sub
 
 Enregistrer:
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-        MsgBox ("Vous avez annulÃ© l'opÃ©ration ! La session SAP sera fermÃ©e !")
+        MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermée !")
         Unload UserForm1
         fermetureSAP
         Exit Sub
     End If
     
-    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder (on retourne Ã  l'ecran initial)
+    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder (on retourne à l'ecran initial)
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
     Return
 
 '[BUG]
 Enregistrer2:
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-        MsgBox ("Vous avez annulÃ© l'opÃ©ration ! La session SAP sera fermÃ©e !")
+        MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermée !")
         Unload UserForm1
         fermetureSAP
         Exit Sub
     End If
     
     session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder
-    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder (on retourne Ã  l'ecran initial)
+    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder (on retourne à l'ecran initial)
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
     
     Return
 
 Achats:
-    '-------- Modifier Article (DonnÃ©es de base, CMS - CMS) --------
+    '-------- Modifier Article (Données de base, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     
     Return
     
 TexteDeCommande:
-    '-------- Modifier Article (DonnÃ©es de base, CMS - CMS) --------
+    '-------- Modifier Article (Données de base, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     
     '-------- Modifier Article (Achats, CMS - CMS) --------
@@ -458,7 +458,7 @@ MRP2:
     GoSub MRP1
     
     '-------- Modifier Article (MRP1, CMS - CMS) --------
-    'Si on a "ND", il y a une Ã©tape de plus, une message est affichÃ©e
+    'Si on a "ND", il y a une étape de plus, une message est affichée
     If (session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
         session.findById("wnd[0]/tbar[1]/btn[18]").press
     End If
@@ -481,7 +481,7 @@ GestionEmplacementsMagasin:
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     
-    '-------- Modifier Article (DonnÃ©es gÃ©n. div./stockage, CMS - CMS) --------
+    '-------- Modifier Article (Données gén. div./stockage, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
     
     Return
