@@ -1,10 +1,13 @@
-Attribute VB_Name = "Module2"
+Attribute VB_Name = "modifierUnArticle"
 Option Explicit
+
+'Modifier seulement une article, l'utilisateur choisi quel article il veut modifier, démarre la macro
+'et choisi quelle modification à faire
+'Modifier des articles pour Nantes et Saint-Nazaire
 
 Sub modifierArticle()
 
-'Se connecter au SAP
-logonSAP
+logonSAP 'Se connecter au SAP
 
 '_________________________________________________________________________________________________'
                    'Modifier Article
@@ -54,8 +57,6 @@ session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
 session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
 session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
 session.findById("wnd[0]/tbar[0]/btn[0]").press
-
-'Il faut selectionner les vues aussi ?
 
 '[BUG]
 Dim typePlan As String
