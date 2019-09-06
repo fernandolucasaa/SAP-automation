@@ -15,39 +15,34 @@ Dim fichier As String, article As String
 Dim fin As Integer, compteur As Integer, limite As Integer, i As Integer
 
 fichier = ThisWorkbook.Name
+
 Workbooks(fichier).Activate
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
 compteur = 0 'qté totale de articles crées
 limite = 4 'limite de vérification
 
-'For i = 4 To fin 'Les deux premieres lignes sont des exemples
-For i = 10 To 10
+For i = 4 To fin 'Les deux premieres lignes sont des exemples
 
     '-------- Barre de recherche --------
     toolBar0.findById("okcd").Text = "mm01"
     wnd0.sendVKey 0 'Enter
     
     '-------- Créer article (Ecran initial) --------
-creer_Article:
-
     Dim modele As String
+    
     Workbooks(fichier).Activate
     modele = ActiveSheet.Range("A" & i).Value '8MODELNENM ou (8MODELZ62M)
     article = ActiveSheet.Range("B" & i).Value
     
     'Vérification du CMS
     If (Len(article) <> 10) Then
+    
         MsgBox "La taille de l'article " & article & " est incorrecte !" & Chr(13) & "L'article se trouve " _
-        & "dans la ligne " & i & " , fixez la valeur avant de continuer !", vbExclamation, "Erreur CMS"
-        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, _
-        "Création des articles")
-            Case vbYes
-                GoTo creer_Article
-            Case vbNo
-                MsgBox ("Vous avez annulé l'opération !")
-                fermetureSAP
-                Exit Sub
-        End Select
+        & "dans la ligne " & i & " , fixez la valeur et relancez l'opération !", vbExclamation, "Erreur CMS"
+        MsgBox ("La session SAP sera ferméé !")
+        fermetureSAP
+        Exit Sub
+        
     End If
     
     userArea.findById("ctxtRMMG1-MATNR").Text = article  'Article
@@ -57,6 +52,7 @@ creer_Article:
 
     'Créer l'article pour le site à Nantes ou à Saint Nazaire
     Dim division As String, magasin As String, numeroMagasin As String, typeMagasin As String
+    
     Workbooks(fichier).Activate
     division = ActiveSheet.Range("J" & i).Value 'NTF ou (NZF)
     magasin = ActiveSheet.Range("K" & i).Value 'NENM ou (Z62M)
@@ -89,47 +85,25 @@ creer_Article:
     session.findById("wnd[1]/tbar[0]/btn[0]").press 'Suite
 
     '-------- Créer article (Données de base, CMS - CMS) --------
-donnees_Base:
-
     Dim designation As String
+    
     Workbooks(fichier).Activate
     designation = ActiveSheet.Range("C" & i).Value
     
     'Vérification de la designation
-    If (designation <> UCase(designation)) Then
-        MsgBox "La designation de l'article " & article & " doit être en majuscule !" & Chr(13) & "L'article se trouve " _
-        & "dans la ligne " & i & " , fixez la valeur avant de continuer !", vbExclamation, "Erreur designation"
-        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, _
-        "Création des articles")
-            Case vbYes
-                GoTo donnees_Base
-            Case vbNo
-                MsgBox ("Vous avez annulé l'opération !")
-                fermetureSAP
-                Exit Sub
-        End Select
-    End If
-    
-    If (Len(designation) > 40) Then
-        MsgBox "Le nombre des caractères de la designation de l'article " & article & " est superior à 40 !" & Chr(13) & "L'article se trouve " _
-        & "dans la ligne " & i & " , fixez la valeur avant de continuer !", vbExclamation, "Erreur designation"
-        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, _
-        "Création des articles")
-            Case vbYes
-                GoTo donnees_Base
-            Case vbNo
-                MsgBox ("Vous avez annulé l'opération !")
-                fermetureSAP
-                Exit Sub
-        End Select
+    If verifierEntree(designation, "designation", article, i) = False Then
+        MsgBox ("La session SAP sera ferméé !")
+        fermetureSAP
+        Exit Sub
     End If
     
     userArea.findById("subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text = designation 'Désignation article
     session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
 
     '-------- Créer article (Achats, CMS - CMS) --------
-    Workbooks(fichier).Activate
     Dim grpAcheteurs As String, tempsReception As String, numFabricant As String
+    
+    Workbooks(fichier).Activate
     grpAcheteurs = ActiveSheet.Range("R" & i).Value 'BF1 ou (CIG)
     tempsReception = ActiveSheet.Range("Y" & i).Value '2
     numFabricant = ActiveSheet.Range("AJ" & i).Value
@@ -142,19 +116,26 @@ donnees_Base:
     wnd0.sendVKey 0 'Enter
 
     '-------- Créer article (Texte de commande, CMS - CMS) --------
-    Workbooks(fichier).Activate
     Dim texteCommande As String
+    
+    Workbooks(fichier).Activate
     texteCommande = ActiveSheet.Range("D" & i).Value
+    
+    'Vérification du texte de commande
+    If verifierEntree(texteCommande, "texte de commande", article, i) = False Then
+        MsgBox ("La session SAP sera ferméé !")
+        fermetureSAP
+        Exit Sub
+    End If
 
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text = texteCommande 'Texte de commande
-    'session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").setSelectionIndexes 6, 6
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    userArea.findById("subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text = texteCommande 'Texte de commande
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
 
     '-------- Créer article (MRP 1, CMS - CMS) --------
-    Workbooks(fichier).Activate
     Dim statutArt As String, typePlanif As String, ptCommande As String, valeurArrondie As String, delaiLivrai As String
     Dim gestionnaire As String, magasinProd As String, magApproExt As String, cleCalcTailleLot As String, cleHorizon As String
-
+    
+    Workbooks(fichier).Activate
     statutArt = ActiveSheet.Range("E" & i).Value 'M1 ou vide
     typePlanif = ActiveSheet.Range("F" & i).Value 'ND ou VB
     ptCommande = ActiveSheet.Range("G" & i).Value
@@ -166,32 +147,34 @@ donnees_Base:
     cleCalcTailleLot = ActiveSheet.Range("V" & i).Value 'EX ou (FX) ou vide
     cleHorizon = ActiveSheet.Range("Z" & i).Value 'N01 ou (Z01)
 
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2481/ctxtMARC-MMSTA").Text = statutArt 'Statut art. par div.
-    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = typePlanif 'Type planification
-    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/txtMARC-MINBE").Text = ptCommande 'Point de commande
-    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2482/ctxtMARC-DISPO").Text = gestionnaire 'Gestionnaire
+    userArea.findById("subSUB2:SAPLMGD1:2481/ctxtMARC-MMSTA").Text = statutArt 'Statut art. par div.
+    userArea.findById("subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = typePlanif 'Type planification
+    userArea.findById("subSUB3:SAPLMGD1:2482/txtMARC-MINBE").Text = ptCommande 'Point de commande
+    userArea.findById("subSUB3:SAPLMGD1:2482/ctxtMARC-DISPO").Text = gestionnaire 'Gestionnaire
 
+    'Nantes : valuer arrondie, St Nazaire : taille de lot fixe
     If (cleCalcTailleLot = "FX") Then 'St Nazaire
-        session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTFE").Text = valeurArrondie '(Taille de lot fixe)
+        userArea.findById("subSUB4:SAPLMGD1:2483/txtMARC-BSTFE").Text = valeurArrondie '(Taille de lot fixe)
     Else 'Nantes
-        session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/txtMARC-BSTRF").Text = valeurArrondie 'Valeur arrondie
+        userArea.findById("subSUB4:SAPLMGD1:2483/txtMARC-BSTRF").Text = valeurArrondie 'Valeur arrondie
     End If
 
+    'Nantes : type 'VB', cle 'EX', St Nazaire : type 'VB', cle 'FX'
     If (typePlanif = "VB") Then
-        session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = cleCalcTailleLot 'Clé calc. taille lot
+        userArea.findById("subSUB4:SAPLMGD1:2483/ctxtMARC-DISLS").Text = cleCalcTailleLot 'Clé calc. taille lot
     End If
 
-    session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2484/ctxtMARC-LGPRO").Text = magasinProd 'Magasin production
-    session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2484/ctxtMARC-LGFSB").Text = magApproExt 'Mag. pour appro. ext
-    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/txtMARC-PLIFZ").Text = delaiLivrai 'Délai prév. livrais
-    session.findById("wnd[0]/usr/subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = cleHorizon 'Clé d'horizon
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    session.findById("wnd[0]").sendVKey 0
+    userArea.findById("subSUB6:SAPLMGD1:2484/ctxtMARC-LGPRO").Text = magasinProd 'Magasin production
+    userArea.findById("subSUB6:SAPLMGD1:2484/ctxtMARC-LGFSB").Text = magApproExt 'Mag. pour appro. ext
+    userArea.findById("subSUB7:SAPLMGD1:2485/txtMARC-PLIFZ").Text = delaiLivrai 'Délai prév. livrais
+    userArea.findById("subSUB7:SAPLMGD1:2485/ctxtMARC-FHORI").Text = cleHorizon 'Clé d'horizon
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
+    wnd0.sendVKey 0 'Enter
 
     '-------- Créer article (MRP 2, CMS - CMS) --------
-    Workbooks(fichier).Activate
     Dim controleDispo As String, indivCollect As String
 
+    Workbooks(fichier).Activate
     controleDispo = ActiveSheet.Range("AB" & i).Value 'KP ou (02)
     indivCollect = ActiveSheet.Range("AC" & i).Value '2
 
@@ -199,39 +182,39 @@ donnees_Base:
         session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").Text = controleDispo 'Controle disponibil.
     End If
 
-    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").caretPosition = 2 'ligne ajoutée, car il avait de bug quand VB
-    session.findById("wnd[0]").sendVKey 0 'ligne ajoutée, car il avait de bug quand VB
-    session.findById("wnd[0]/usr/subSUB6:SAPLMGD1:2495/ctxtMARC-SBDKZ").Text = indivCollect 'Individuel/Collectif
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    userArea.findById("subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").caretPosition = 2 'ligne ajoutée, car il avait de bug quand VB
+    wnd0.sendVKey 0 'ligne ajoutée, car il avait de bug quand VB
+    userArea.findById("subSUB6:SAPLMGD1:2495/ctxtMARC-SBDKZ").Text = indivCollect 'Individuel/Collectif
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
 
     '-------- Créer article (Donnéees gén. div./stockage, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
 
     '-------- Créeer article (Gestion emplacements magasin, CMS - CMS) --------
-    Workbooks(fichier).Activate
     Dim typeMagSM As String, typeMagEM As String
 
+    Workbooks(fichier).Activate
     typeMagSM = ActiveSheet.Range("AE" & i).Value 'NEN ou (Z62)
     typeMagEM = ActiveSheet.Range("AF" & i).Value 'NEN ou (Z62)
 
-    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZA").Text = typeMagSM 'Type magasin pour SM
-    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZE").Text = typeMagEM 'Type magasin EM
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    userArea.findById("subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZA").Text = typeMagSM 'Type magasin pour SM
+    userArea.findById("subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZE").Text = typeMagEM 'Type magasin EM
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
 
     '-------- Créer article (Comptabilité, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[26]").press
-    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2802/ctxtMBEW-BKLAS").Text = "0510" 'Classe valorisation
-    session.findById("wnd[0]/usr/subSUB3:SAPLMGD1:2802/ctxtMBEW-BKLAS").caretPosition = 4
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    session.findById("wnd[0]").sendVKey 0
-    session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
+    userArea.findById("subSUB3:SAPLMGD1:2802/ctxtMBEW-BKLAS").Text = "0510" 'Classe valorisation
+    userArea.findById("subSUB3:SAPLMGD1:2802/ctxtMBEW-BKLAS").caretPosition = 4
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
+    wnd0.sendVKey 0
+    session.findById("wnd[1]/usr/btnSPOP-OPTION1").press 'Quittez le traitement et sauvegarder
 
     'Articles créees
     compteur = compteur + 1
 
     'Retourner à l'accueil
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'buttom pour faire le retour
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'buttom pour faire le retour
+    toolBar0.findById("btn[3]").press 'buttom pour faire le retour
+    toolBar0.findById("btn[3]").press 'buttom pour faire le retour
     
     'Vérification manuelle de l'utilisateur
     If (compteur = limite) Then
@@ -251,11 +234,6 @@ Next i
 'Création terminée
 MsgBox ("La création des articles est finie ! Vous avez crée " & compteur & " articles.")
 
-'Vider les cellules
-'Workbooks(fichier).Activate
-'ActiveSheet.Range("B4:I" & fin).ClearContents
-'ActiveSheet.Range("V4:V" & fin).ClearContents
-
 'Sauvegarder
 Workbooks(fichier).Save
 
@@ -271,12 +249,35 @@ Sub verifierErreur()
 Dim messageErreur As String
 
 If (statusBar.MessageType = "E") Then
+
     messageErreur = statusBar.Text
     MsgBox ("L'erreur suivant a été créé : " & Chr(13) & "<<" & messageErreur & ">>." & Chr(13) _
     & "La session SAP sera ferméé !")
     fermetureSAP
     End
+    
 End If
 
 End Sub
 
+Function verifierEntree(valeur As String, variable As String, article As String, pos As Integer) As Boolean
+
+verifierEntree = True
+
+If (valeur <> UCase(valeur)) Then
+        
+    MsgBox variable & "de l'article " & article & " doit être en majuscule !" & Chr(13) & "L'article se trouve " _
+    & "dans la ligne " & pos & " , fixez la valeur et relancez l'opération !", vbExclamation, "Erreur"
+    verifierEntree = False
+    
+End If
+    
+If (Len(valeur) > 40) Then
+    
+    MsgBox "Le nombre des caractères de " & variable & " de l'article " & article & " est superior à 40 !" & Chr(13) & "L'article se trouve " _
+    & "dans la ligne " & pos & " , fixez la valeur et relancez l'opération !", vbExclamation, "Erreur"
+    verifierEntree = False
+    
+End If
+
+End Function
