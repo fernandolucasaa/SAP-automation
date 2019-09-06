@@ -348,7 +348,7 @@ For i = 4 To fin
     
     ElseIf UserForm1.OptionButton14 = True Then 'Controle Dispo
     
-        GoSub MRP2
+        GoSub mrp2
         
         '-------- Modifier article (MRP 2, CMS - CMS) --------
         Dim controleDispo As String
@@ -454,7 +454,7 @@ MRP1:
     
     Return
 
-MRP2:
+mrp2:
     GoSub MRP1
     
     '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -468,7 +468,7 @@ MRP2:
     Return
 
 DonneesGenDivStockage:
-    GoSub MRP2
+    GoSub mrp2
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
@@ -476,7 +476,7 @@ DonneesGenDivStockage:
     Return
 
 GestionEmplacementsMagasin:
-    GoSub MRP2
+    GoSub mrp2
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
