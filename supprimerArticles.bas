@@ -123,7 +123,7 @@ For i = 19 To 19
 
     session.findById("wnd[0]/tbar[0]/btn[0]").press
 
-    '-------- Modifier Article (Données de base, CMS - CMS) --------
+    '-------- Modifier Article (DonnÃ©es de base, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
     '-------- Modifier Article (Achats, CMS - CMS) --------
@@ -139,7 +139,7 @@ For i = 19 To 19
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
-    '-------- Modifier Article (Données gén. div./stockage, CMS - CMS) --------
+    '-------- Modifier Article (DonnÃ©es gÃ©n. div./stockage, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
 
     '-------- Gestion emplacements Masagin (CMS - CMS) --------
@@ -152,12 +152,12 @@ For i = 19 To 19
                     'Transfert
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
     
-    'Recuper la quantité demandée
+    'Recuper la quantitÃ© demandÃ©e
     '-------- Barre de recherche --------
     session.findById("wnd[0]/tbar[0]/okcd").Text = "md04"
     session.findById("wnd[0]").sendVKey 0
     
-    '-------- Etat dynamique des stocks actuel : écran initial --------
+    '-------- Etat dynamique des stocks actuel : Ã©cran initial --------
     session.findById("wnd[0]/usr/tabsTAB300/tabpF01/ssubINCLUDE300:SAPMM61R:0301/ctxtRM61R-MATNR").Text = article
     session.findById("wnd[0]/usr/tabsTAB300/tabpF01/ssubINCLUDE300:SAPMM61R:0301/ctxtRM61R-WERKS").Text = division
     session.findById("wnd[0]").sendVKey 0
@@ -175,15 +175,15 @@ For i = 19 To 19
     session.findById("wnd[0]/tbar[0]/okcd").Text = "lt01"
     session.findById("wnd[0]").sendVKey 0
     
-    '-------- Créer ordre de transfert : écran initial --------
-    session.findById("wnd[0]/usr/ctxtLTAK-LGNUM").Text = numeroMagasin 'Numéro de magasin
+    '-------- CrÃ©er ordre de transfert : Ã©cran initial --------
+    session.findById("wnd[0]/usr/ctxtLTAK-LGNUM").Text = numeroMagasin 'NumÃ©ro de magasin
     session.findById("wnd[0]/usr/ctxtLTAK-BWLVS").Text = "999" 'Code mouvement
     session.findById("wnd[0]/usr/ctxtLTAP-MATNR").Text = article 'Article
-    session.findById("wnd[0]/usr/txtRL03T-ANFME").Text = qteDemandee 'Qté demandée
+    session.findById("wnd[0]/usr/txtRL03T-ANFME").Text = qteDemandee 'QtÃ© demandÃ©e
     session.findById("wnd[0]/usr/ctxtLTAP-WERKS").Text = division 'Division/Magasin
     session.findById("wnd[0]/tbar[0]/btn[0]").press
     
-    '-------- Créer ordre de transfert : générer poste OT --------
+    '-------- CrÃ©er ordre de transfert : gÃ©nÃ©rer poste OT --------
     
     [PROBLEMES !!!!!!!!!!!!!!!]
     
@@ -211,12 +211,12 @@ For i = 19 To 19
     session.findById("wnd[0]/tbar[0]/okcd").Text = "mm06"
     session.findById("wnd[0]").sendVKey 0
     
-    '-------- Position témoin suppresion article : écran de sélection --------
+    '-------- Position tÃ©moin suppresion article : Ã©cran de sÃ©lection --------
     session.findById("wnd[0]/usr/ctxtRM03G-MATNR").Text = article
     session.findById("wnd[0]/usr/ctxtRM03G-WERKS").Text = division
     session.findById("wnd[0]").sendVKey 0
     
-    '-------- Position témoin suppresion article : écran de données --------
+    '-------- Position tÃ©moin suppresion article : Ã©cran de donnÃ©es --------
     session.findById("wnd[0]/usr/chkRM03G-LVOMA").Selected = True 'Article
     session.findById("wnd[0]/usr/chkRM03G-LVOWK").Selected = True 'Division
     
@@ -225,12 +225,12 @@ For i = 19 To 19
     session.findById("wnd[0]/tbar[0]/btn[0]").press 'Suite
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
     
-    'Article supprimé
+    'Article supprimÃ©
     supprimes = supprimes & article & " "
 
 Next i
 
-MsgBox ("La suppression des articles est fini." & Chr(13) & "Les articles suivants ont été supprimés : " & supprimes)
+MsgBox ("La suppression des articles est fini." & Chr(13) & "Les articles suivants ont Ã©tÃ© supprimÃ©s : " & supprimes)
 
 'Vider les cellules
 'Workbooks(fichier).Activate
@@ -248,5 +248,5 @@ End If
 Exit Sub
 
 errHandler:
-    MsgBox "Une erreur est survenue !" & vbCrLf & "Numéro d'erreur : " & Err.Number & vbCrLf & "Description d'erreur : " & Err.Description
+    MsgBox "Une erreur est survenue !" & vbCrLf & "NumÃ©ro d'erreur : " & Err.Number & vbCrLf & "Description d'erreur : " & Err.Description
 End Sub
