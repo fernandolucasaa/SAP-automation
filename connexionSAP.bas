@@ -21,12 +21,15 @@ Do Until WSHShell.AppActivate("SAP Logon") 'Attendre SAP ouvrir
     Application.Wait Now + TimeValue("0:00:01")
 Loop
 
-Set SapGui = GetObject("SAPGUI") 'get the interface of the SAPGUI object
+'Récupérer l'interface de l'objet SAPGUI
+Set SapGui = GetObject("SAPGUI")
+
 If Not IsObject(SapGui) Then
     Exit Sub
 End If
 
-Set Applic = SapGui.GetScriptingEngine 'get the interface of the currently running SAP GUI process
+'Récupérer l'interface du processus SAP GUI en exécution
+Set Applic = SapGui.GetScriptingEngine
 
 If Not IsObject(Applic) Then
     Exit Sub
@@ -56,16 +59,16 @@ End If
 connexion:
 'identifiant = "ng2b609"
 'motDePasse = "Dr210591"
-'identifiant = "ng2b23d"
-'motDePasse = "RPS08201"
+identifiant = "ng2b23d"
+motDePasse = "RPS08201"
 
-identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "Connexion SAP")
+'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "Connexion SAP")
 If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenêtre
     MsgBox ("Vous avez annulé l'opération !")
     End 'Arrête tous les procedures en exécution
 End If
 
-motDePasse = InputBox("Ecrivez votre mot de passe", "Connexion SAP")
+'motDePasse = InputBox("Ecrivez votre mot de passe", "Connexion SAP")
 If StrPtr(motDePasse) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenêtre
     MsgBox ("Vous avez annulé l'opération !")
     End
@@ -93,6 +96,7 @@ wnd0.sendVKey 0 'Enter
 
 'Vérification de la bonne connexion
 If (statusBar.MessageType = "E") Then 'Erreur au connecter au SAP
+
     messageErreur = statusBar.Text
     Select Case MsgBox("La connexion SAP a échouée ! On a la message suivante : " & Chr(13) & "<<" & messageErreur _
     & ">>." & Chr(13) & "Voulez-vous ressayer la connexion ?", vbYesNo + vbExclamation, "Connexion échouée")
@@ -103,6 +107,7 @@ If (statusBar.MessageType = "E") Then 'Erreur au connecter au SAP
             wnd0.Close 'Fermer
             End
     End Select
+    
 End If
 
 End Sub
