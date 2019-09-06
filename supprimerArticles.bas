@@ -1,88 +1,26 @@
-Attribute VB_Name = "Module1"
-Option Explicit 'rend obligatoire la declaration des variables avant leur utilisation
+Attribute VB_Name = "supprimerArticles"
+'Faire la suppression des articles en trois étapes : Emplacement, Transfert, Suppression
 
 Sub supprimerArticles_SAP()
-'_________________________________________________________________________________________________'
-                    'Logon SAP
-'Variables
-Dim SapGui, Applic, Connection, session, WSHShell
-Dim identifiant As String, motDePasse As String, langue As String
 
-'On Error GoTo errHandler
-
-'identifiant = "ng2b609"
-'motDePasse = "Dr210591"
-identifiant = "ng2b23d"
-motDePasse = "RPS08201"
-
-'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "RPS")
-If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-    Exit Sub
-End If
-
-'motDePasse = InputBox("Ecrivez votre mot de passe", "RPS")
-If StrPtr(motDePasse) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
-    Exit Sub
-End If
-
-langue = "FR"
-
-Shell ("C:\Program Files (x86)\SAP\FrontEnd\SAPgui\saplogon.exe")
-
-Set WSHShell = CreateObject("WScript.Shell")
-
-Do Until WSHShell.AppActivate("SAP Logon") 'Attendre SAP ouvrir
-    Application.Wait Now + TimeValue("0:00:01")
-Loop
-
-Set SapGui = GetObject("SAPGUI") 'get the interface of the SAPGUI object
-
-If Not IsObject(SapGui) Then
-    Exit Sub
-End If
-
-Set Applic = SapGui.GetScriptingEngine 'get the interface of the currently running SAP GUI process
-
-If Not IsObject(Applic) Then
-    Exit Sub
-End If
-
-Set Connection = Applic.openconnection("..SAP2000 Production             PGI")
-
-If Not IsObject(Connection) Then
-   Exit Sub
-End If
-
-Set session = Connection.Children(0)
-If Connection.Children.Count < 1 Then
-    Exit Sub
-Else
-    Set session = Connection.Children(0)
-End If
-
-If Not IsObject(session) Then
-   Exit Sub
-End If
-
-session.findById("wnd[0]").maximize
-session.findById("wnd[0]/usr/txtRSYST-BNAME").Text = identifiant
-session.findById("wnd[0]/usr/pwdRSYST-BCODE").Text = motDePasse
-
-session.findById("wnd[0]/usr/txtRSYST-LANGU").Text = langue
-session.findById("wnd[0]").sendVKey 0
+logonSAP 'Se connecter au SAP
 
 '_________________________________________________________________________________________________'
-                    'Suppresion
-Dim fichier As String, article As String, division As String, numeroMagasin As String, emplacement As String, dernier As String, i As Integer
-Dim qteDemandee As String, supprimes As String, magasin As String, typeMagasin As String
+                    'Suppression des articles
+Dim fichier As String, dernier As String, i As Integer, compteur As String
 
 fichier = ThisWorkbook.Name
 
 Workbooks(fichier).Activate
 dernier = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
+compteur = 0 'qté des articles suprimés
 
-'For i = 4 To dernier 'Les deux premieres lignes sont des exemples
-For i = 19 To 19
+'For i = 4 To dernier
+For i = 8 To 8
+
+    'Variables
+    Dim article As String, division As String, numeroMagasin As String, emplacement As String
+    Dim qteDemandee As String, magasin As String, typeMagasin As String
 
     Workbooks(fichier).Activate
     article = ActiveSheet.Range("B" & i).Value 'CMS
@@ -91,24 +29,19 @@ For i = 19 To 19
     division = ActiveSheet.Range("J" & i).Value 'NTF ou (NZF)
     magasin = ActiveSheet.Range("K" & i).Value 'NENM ou (Z62M)
     typeMagasin = ActiveSheet.Range("M" & i).Value 'NEN ou (Z62)
+    'article = "8405033596"
     
-    Debug.Print article
-    Debug.Print division
-    Debug.Print numeroMagasin
-
     '_________________________________________________________________________________________________'
                     'Modifier Article (Emplacement)
-    emplacement = InputBox("Quel est le nouveau emplacement du article " & article & " ?")
-    'emplacement = "0A0105"
-
-    'session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    'emplacement = InputBox("Quel est le nouveau emplacement du article " & article & " ?")
+    emplacement = "0A0105"
 
     '-------- Barre de recherche --------
-    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm02"
-    session.findById("wnd[0]").sendVKey 0
+    toolBar0.findById("okcd").Text = "mm02"
+    wnd0.sendVKey 0 'Enter
 
     '-------- Modifier Article (Ecran initial) --------
-    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article
+    userArea.findById("ctxtRMMG1-MATNR").Text = article
     
     'Configurer le niveau de organization (Nantes ou St Nazaire)
     session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
@@ -120,70 +53,65 @@ For i = 19 To 19
     session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
     session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
     session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
-
-    session.findById("wnd[0]/tbar[0]/btn[0]").press
-
-    '-------- Modifier Article (DonnÃ©es de base, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-
-    '-------- Modifier Article (Achats, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-
-    '-------- Modifier Article (Texte de commande, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    session.findById("wnd[1]/tbar[0]/btn[0]").press 'Suite
+    
+    'Aller jusqu'à fenêtre MRP1
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant (Données de base)
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant (Achats)
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant (Texte de commande)
 
     '-------- Modifier Article (MRP1, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    'session.findById("wnd[0]/tbar[1]/btn[18]").press
-
-    '-------- Modifier Article (MRP2, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-
-    '-------- Modifier Article (DonnÃ©es gÃ©n. div./stockage, CMS - CMS) --------
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+    If (userArea.findById("subSUB3:SAPLMGD1:2482/ctxtMARC-DISMM").Text = "ND") Then
+        session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
+    End If
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
+    
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant (MRP2)
+    
+    '-------- Modifier Article (Données gén. div./stockage, CMS - CMS) --------
+    userArea.findById("subSUB2:SAPLMGD1:2701/txtMARD-LGPBE").Text = emplacement
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant (Données gén. div./stockage)
 
     '-------- Gestion emplacements Masagin (CMS - CMS) --------
-    session.findById("wnd[0]/usr/subSUB5:SAPLMGD1:2734/ctxtMLGT-LGPLA").Text = emplacement
-    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
-    'session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    userArea.findById("subSUB5:SAPLMGD1:2734/ctxtMLGT-LGPLA").Text = emplacement
+    toolBar0.findById("btn[11]").press 'Sauvegarder (Retouner à l'ecran initial)
+    toolBar0.findById("btn[3]").press 'Retour
 
     '_________________________________________________________________________________________________'
                     'Transfert
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+                    
+    'Récupérer la quantité demandée :
     
-    'Recuper la quantitÃ© demandÃ©e
     '-------- Barre de recherche --------
-    session.findById("wnd[0]/tbar[0]/okcd").Text = "md04"
-    session.findById("wnd[0]").sendVKey 0
+    toolBar0.findById("okcd").Text = "md04"
+    wnd0.sendVKey 0 'Enter
     
-    '-------- Etat dynamique des stocks actuel : Ã©cran initial --------
-    session.findById("wnd[0]/usr/tabsTAB300/tabpF01/ssubINCLUDE300:SAPMM61R:0301/ctxtRM61R-MATNR").Text = article
-    session.findById("wnd[0]/usr/tabsTAB300/tabpF01/ssubINCLUDE300:SAPMM61R:0301/ctxtRM61R-WERKS").Text = division
-    session.findById("wnd[0]").sendVKey 0
+    '-------- Etat dynamique des stocks actuel : écran initial --------
+    userArea.findById("tabsTAB300/tabpF01/ssubINCLUDE300:SAPMM61R:0301/ctxtRM61R-MATNR").Text = article
+    userArea.findById("tabsTAB300/tabpF01/ssubINCLUDE300:SAPMM61R:0301/ctxtRM61R-WERKS").Text = division
+    wnd0.sendVKey 0 'Enter
     
     '-------- Etat dynamique des stocks --------
-    qteDemandee = session.findById("wnd[0]/usr/subINCLUDE1XX:SAPMM61R:0750/tblSAPMM61RTC_EZ/txtMDEZ-MNG02[9,0]").Text
+    qteDemandee = userArea.findById("subINCLUDE1XX:SAPMM61R:0750/tblSAPMM61RTC_EZ/txtMDEZ-MNG02[9,0]").Text
     Debug.Print qteDemandee
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    toolBar0.findById("btn[3]").press 'Retour
+    toolBar0.findById("btn[3]").press 'Retour
     
-    'Faire le transfert
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    'Faire le transfert :
     
     '-------- Barre de recherche --------
-    session.findById("wnd[0]/tbar[0]/okcd").Text = "lt01"
-    session.findById("wnd[0]").sendVKey 0
+    toolBar0.findById("okcd").Text = "lt01"
+    wnd0.sendVKey 0 'Enter
     
-    '-------- CrÃ©er ordre de transfert : Ã©cran initial --------
-    session.findById("wnd[0]/usr/ctxtLTAK-LGNUM").Text = numeroMagasin 'NumÃ©ro de magasin
-    session.findById("wnd[0]/usr/ctxtLTAK-BWLVS").Text = "999" 'Code mouvement
-    session.findById("wnd[0]/usr/ctxtLTAP-MATNR").Text = article 'Article
-    session.findById("wnd[0]/usr/txtRL03T-ANFME").Text = qteDemandee 'QtÃ© demandÃ©e
-    session.findById("wnd[0]/usr/ctxtLTAP-WERKS").Text = division 'Division/Magasin
-    session.findById("wnd[0]/tbar[0]/btn[0]").press
+    '-------- Créer ordre de transfert : écran initial --------
+    userArea.findById("ctxtLTAK-LGNUM").Text = numeroMagasin 'Numéro de magasin
+    userArea.findById("ctxtLTAK-BWLVS").Text = "999" 'Code mouvement
+    userArea.findById("ctxtLTAP-MATNR").Text = article 'Article
+    userArea.findById("txtRL03T-ANFME").Text = qteDemandee 'Qté demandée
+    userArea.findById("ctxtLTAP-WERKS").Text = division 'Division/Magasin
+    toolBar0.findById("btn[0]").press 'Touche "Suite"
     
-    '-------- CrÃ©er ordre de transfert : gÃ©nÃ©rer poste OT --------
+    '-------- Créer ordre de transfert : générer poste OT --------
     
     [PROBLEMES !!!!!!!!!!!!!!!]
     
@@ -208,45 +136,46 @@ For i = 19 To 19
                     'Supprimer des articles
 
     '-------- Barre de recherche --------
-    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm06"
-    session.findById("wnd[0]").sendVKey 0
+    toolBar0.findById("okcd").Text = "mm06"
+    wnd0.sendVKey 0 'Enter
     
-    '-------- Position tÃ©moin suppresion article : Ã©cran de sÃ©lection --------
-    session.findById("wnd[0]/usr/ctxtRM03G-MATNR").Text = article
-    session.findById("wnd[0]/usr/ctxtRM03G-WERKS").Text = division
-    session.findById("wnd[0]").sendVKey 0
+    '-------- Position témoin suppresion article : écran de sélection --------
+    userArea.findById("ctxtRM03G-MATNR").Text = article
+    userArea.findById("ctxtRM03G-WERKS").Text = division
+    wnd0.sendVKey 0 'Enter
     
-    '-------- Position tÃ©moin suppresion article : Ã©cran de donnÃ©es --------
-    session.findById("wnd[0]/usr/chkRM03G-LVOMA").Selected = True 'Article
-    session.findById("wnd[0]/usr/chkRM03G-LVOWK").Selected = True 'Division
+    '-------- Position témoin suppresion article : écran de données --------
+    userArea.findById("chkRM03G-LVOMA").Selected = True 'Article
+    userArea.findById("chkRM03G-LVOWK").Selected = True 'Division
     
-    session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder
-    'session.findById("wnd[0]/tbar[0]/btn[15]").press 'Terminer
-    session.findById("wnd[0]/tbar[0]/btn[0]").press 'Suite
-    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    toolBar0.findById("btn[11]").press 'Sauvegarder
+    toolBar0.findById("btn[0]").press 'Suite
+    toolBar0.findById("btn[3]").press 'Retour
     
-    'Article supprimÃ©
-    supprimes = supprimes & article & " "
+    'Articles supprimés
+    compteur = compteur + 1
 
 Next i
 
-MsgBox ("La suppression des articles est fini." & Chr(13) & "Les articles suivants ont Ã©tÃ© supprimÃ©s : " & supprimes)
-
-'Vider les cellules
-'Workbooks(fichier).Activate
-'ActiveSheet.Range("B4:I" & dernier).ClearContents
-'ActiveSheet.Range("V4:V" & dernier).ClearContents
+'Suppresion terminéé
+MsgBox ("La suppression des articles est finie !" & Chr(13) & "Vous avez supprimé " & compteur & " articles.")
 
 'Sauvegarder
 Workbooks(fichier).Save
 
 'Fermeture de la connexion
-If MsgBox("La suppression des articles est fini. Voulez-vous fermer votre session SAP ?", vbYesNo, "RPS") = vbYes Then
-    session.findById("wnd[0]").Close
-    session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
+If MsgBox("Voulez-vous fermer votre session SAP ?", vbYesNo, "Fermeture de la session SAP") = vbYes Then
+    fermetureSAP
 End If
-Exit Sub
 
-errHandler:
-    MsgBox "Une erreur est survenue !" & vbCrLf & "NumÃ©ro d'erreur : " & Err.Number & vbCrLf & "Description d'erreur : " & Err.Description
+'Exit Sub
+'
+'errHandler:
+'    MsgBox "Une erreur est survenue !" & vbCrLf & "Numéro d'erreur : " & Err.Number & vbCrLf & "Description d'erreur : " & Err.Description
 End Sub
+
+
+
+
+
+
