@@ -22,7 +22,6 @@ Do Until WSHShell.AppActivate("SAP Logon") 'Attendre SAP ouvrir
 Loop
 
 Set SapGui = GetObject("SAPGUI") 'get the interface of the SAPGUI object
-
 If Not IsObject(SapGui) Then
     Exit Sub
 End If
@@ -33,14 +32,16 @@ If Not IsObject(Applic) Then
     Exit Sub
 End If
 
-'Etablir la connexion avec SAP PGI
+'Connexion avec SAP PGI
 Set Connection = Applic.openconnection("..SAP2000 Production             PGI")
 
 If Not IsObject(Connection) Then
    Exit Sub
 End If
 
+'Session
 Set session = Connection.Children(0)
+
 If Connection.Children.Count < 1 Then
     Exit Sub
 Else
