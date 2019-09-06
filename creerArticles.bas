@@ -11,15 +11,14 @@ logonSAP 'Se connecter au SAP
 
 '_________________________________________________________________________________________________'
                     'Creer une article
-Dim fichier As String, article As String, modele As String, designation As String, i As Integer
-Dim fin As Integer, nouveaux As String, compteur As Integer, limite As Integer
+Dim fichier As String, article As String
+Dim fin As Integer, compteur As Integer, limite As Integer, i As Integer
 
 fichier = ThisWorkbook.Name
-
 Workbooks(fichier).Activate
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
 compteur = 0 'qté totale de articles crées
-limite = 5 'limite de vérification
+limite = 4 'limite de vérification
 
 'For i = 4 To fin 'Les deux premieres lignes sont des exemples
 For i = 10 To 10
@@ -27,13 +26,30 @@ For i = 10 To 10
     '-------- Barre de recherche --------
     toolBar0.findById("okcd").Text = "mm01"
     wnd0.sendVKey 0 'Enter
+    
+    '-------- Créer article (Ecran initial) --------
+creer_Article:
 
+    Dim modele As String
     Workbooks(fichier).Activate
     modele = ActiveSheet.Range("A" & i).Value '8MODELNENM ou (8MODELZ62M)
     article = ActiveSheet.Range("B" & i).Value
-    designation = ActiveSheet.Range("C" & i).Value
-
-    '-------- Créer article (Ecran initial) --------
+    
+    'Vérification du CMS
+    If (Len(article) <> 10) Then
+        MsgBox "La taille de l'article " & article & " est incorrecte !" & Chr(13) & "L'article se trouve " _
+        & "dans la ligne " & i & " , fixez la valeur avant de continuer !", vbExclamation, "Erreur CMS"
+        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, _
+        "Création des articles")
+            Case vbYes
+                GoTo creer_Article
+            Case vbNo
+                MsgBox ("Vous avez annulé l'opération !")
+                fermetureSAP
+                Exit Sub
+        End Select
+    End If
+    
     userArea.findById("ctxtRMMG1-MATNR").Text = article  'Article
     userArea.findById("cmbRMMG1-MBRSH").Key = "M"  'Branche
     userArea.findById("cmbRMMG1-MTART").Key = "CMS"  'Type d'article (CMS - CMS)
@@ -41,7 +57,6 @@ For i = 10 To 10
 
     'Créer l'article pour le site à Nantes ou à Saint Nazaire
     Dim division As String, magasin As String, numeroMagasin As String, typeMagasin As String
-
     Workbooks(fichier).Activate
     division = ActiveSheet.Range("J" & i).Value 'NTF ou (NZF)
     magasin = ActiveSheet.Range("K" & i).Value 'NENM ou (Z62M)
@@ -49,9 +64,8 @@ For i = 10 To 10
     typeMagasin = ActiveSheet.Range("M" & i).Value 'NEN ou (Z62)
 
     session.findById("wnd[0]/tbar[1]/btn[6]").press 'ouvrir le "Niveaux de organization"
-    'verifierErreur
     
-    'Configurer le niveau de organization (Nantes ou St Nazaire)
+    'Configurer le niveau de organization
     session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = "" 'Division
     session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = "" 'Magasin
     session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = "" 'Numero magasin
@@ -60,13 +74,10 @@ For i = 10 To 10
     session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
     session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
     session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
-    session.findById("wnd[1]/tbar[0]/btn[5]").press
-    'verifierErreur
-
-    'Effacer la selection
-    session.findById("wnd[1]/tbar[0]/btn[19]").press
+    session.findById("wnd[1]/tbar[0]/btn[5]").press 'Sélection des vues
 
     'Sélection des vues
+    session.findById("wnd[1]/tbar[0]/btn[19]").press 'Demarquer tout
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'Données de base
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(5).Selected = True 'Achats
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(6).Selected = True 'Texte de commande
@@ -75,12 +86,46 @@ For i = 10 To 10
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(12).Selected = True 'Données gén. div./stockage
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(13).Selected = True 'Gestion emplacements magasin
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(15).Selected = True 'Comptabilité
-    'session.findById("wnd[1]/tbar[0]/btn[0]").press 'Retour à la fenetre "Niveaux de organization"
-    session.findById("wnd[1]/tbar[0]/btn[0]").press
+    session.findById("wnd[1]/tbar[0]/btn[0]").press 'Suite
 
     '-------- Créer article (Données de base, CMS - CMS) --------
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text = designation 'Désignation article
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
+donnees_Base:
+
+    Dim designation As String
+    Workbooks(fichier).Activate
+    designation = ActiveSheet.Range("C" & i).Value
+    
+    'Vérification de la designation
+    If (designation <> UCase(designation)) Then
+        MsgBox "La designation de l'article " & article & " doit être en majuscule !" & Chr(13) & "L'article se trouve " _
+        & "dans la ligne " & i & " , fixez la valeur avant de continuer !", vbExclamation, "Erreur designation"
+        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, _
+        "Création des articles")
+            Case vbYes
+                GoTo donnees_Base
+            Case vbNo
+                MsgBox ("Vous avez annulé l'opération !")
+                fermetureSAP
+                Exit Sub
+        End Select
+    End If
+    
+    If (Len(designation) > 40) Then
+        MsgBox "Le nombre des caractères de la designation de l'article " & article & " est superior à 40 !" & Chr(13) & "L'article se trouve " _
+        & "dans la ligne " & i & " , fixez la valeur avant de continuer !", vbExclamation, "Erreur designation"
+        Select Case MsgBox("Voulez-vous continuer la création des articles ?", vbYesNo + vbQuestion, _
+        "Création des articles")
+            Case vbYes
+                GoTo donnees_Base
+            Case vbNo
+                MsgBox ("Vous avez annulé l'opération !")
+                fermetureSAP
+                Exit Sub
+        End Select
+    End If
+    
+    userArea.findById("subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text = designation 'Désignation article
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
 
     '-------- Créer article (Achats, CMS - CMS) --------
     Workbooks(fichier).Activate
@@ -88,13 +133,13 @@ For i = 10 To 10
     grpAcheteurs = ActiveSheet.Range("R" & i).Value 'BF1 ou (CIG)
     tempsReception = ActiveSheet.Range("Y" & i).Value '2
     numFabricant = ActiveSheet.Range("AJ" & i).Value
-
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/chkMARC-KAUTB").Selected = True 'Cde automatique
-    session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2301/ctxtMARC-EKGRP").Text = grpAcheteurs 'Groupe d'acheteurs
-    session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2303/txtMARC-WEBAZ").Text = tempsReception 'Temps de réception
-    session.findById("wnd[0]/usr/subSUB11:SAPLMGD1:2312/txtMARA-MFRPN").Text = numFabricant 'N° pce fabricant
-    session.findById("wnd[0]/tbar[1]/btn[18]").press
-    session.findById("wnd[0]").sendVKey 0
+    
+    userArea.findById("subSUB2:SAPLMGD1:2301/chkMARC-KAUTB").Selected = True 'Cde automatique
+    userArea.findById("subSUB2:SAPLMGD1:2301/ctxtMARC-EKGRP").Text = grpAcheteurs 'Groupe d'acheteurs
+    userArea.findById("subSUB4:SAPLMGD1:2303/txtMARC-WEBAZ").Text = tempsReception 'Temps de réception
+    userArea.findById("subSUB11:SAPLMGD1:2312/txtMARA-MFRPN").Text = numFabricant 'N° pce fabricant
+    session.findById("wnd[0]/tbar[1]/btn[18]").press 'Ecran suivant
+    wnd0.sendVKey 0 'Enter
 
     '-------- Créer article (Texte de commande, CMS - CMS) --------
     Workbooks(fichier).Activate
@@ -181,8 +226,7 @@ For i = 10 To 10
     session.findById("wnd[0]").sendVKey 0
     session.findById("wnd[1]/usr/btnSPOP-OPTION1").press
 
-    'Article créee
-    nouveaux = nouveaux & article & " "
+    'Articles créees
     compteur = compteur + 1
 
     'Retourner à l'accueil
