@@ -39,10 +39,10 @@ For i = premier To dernier
     
     session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = division
     session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = emplStockage
-    session.findById("wnd[1]/tbar[0]/btn[5]").press 'Selection des vues
+    session.findById("wnd[1]/tbar[0]/btn[0]").press 'Suite
+'    session.findById("wnd[1]/tbar[0]/btn[5]").press 'Selection des vues
 
-    'Selection des vues (ouvri de manièere automatique)
-    session.findById("wnd[1]/tbar[0]/btn[0]").press 'Effacer la sélection
+    'Selection des vues (Pour division NZ01)
 '    session.findById("wnd[1]/tbar[0]/btn[19]").press 'Effacer la sélection
 '    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'Données de base 1
 '    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(2).Selected = True 'Achats
@@ -56,6 +56,21 @@ For i = premier To dernier
 '    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(11).Selected = True 'Comptabilité 1
 '    session.findById("wnd[1]/tbar[0]/btn[0]").press 'Suite
 
+    'Selection des vues (Pour division ME01)
+'    session.findById("wnd[1]/tbar[0]/btn[19]").press 'Effacer la sélection
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'Données de base 1
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(8).Selected = True 'Achats
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(10).Selected = True 'Texte de commande d'achat
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(11).Selected = True 'Planification des besoins 1
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(12).Selected = True 'Planification des besoins 2
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(13).Selected = True 'Planification des besoins 3
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(14).Selected = True 'Planification des besoins 4
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").verticalScrollbar.position = 15 'Ajuster la position du scroll
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(15).Selected = True 'Données gén. divs./stockage 1
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(16).Selected = True 'Données gén. divs./stockage 2
+'    session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(18).Selected = True 'Comptabilité 1
+'    session.findById("wnd[1]/tbar[0]/btn[0]").press 'Suite
+
     '-------- Afficher article (Données de base 1) --------
     session.findById("wnd[0]").sendVKey 0
     
@@ -63,6 +78,13 @@ For i = premier To dernier
     session.findById("wnd[0]").sendVKey 0
     
     '-------- Afficher article (Texte commande de achat) --------
+    Dim texteCommande As String
+    
+    texteCommande = session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP11/ssubTABFRA1:SAPLMGMM:2010/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text
+    
+    Windows(fichier).Activate
+    ActiveSheet.Range("F" & i).Value = texteCommande
+    
     session.findById("wnd[0]").sendVKey 0
     
     '-------- Afficher article (Planif. des besions 1) -------
@@ -96,6 +118,7 @@ For i = premier To dernier
     session.findById("wnd[0]").sendVKey 0
     
     session.findById("wnd[1]/usr/btnSPOP-OPTION1").press 'Quitter l'affichage de l'article
+    session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
 
     compteur = compteur + 1
     
