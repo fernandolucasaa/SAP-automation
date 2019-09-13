@@ -256,4 +256,5 @@ MsgBox ("La création des articles est finie ! Vous avez créé " + compteur + "
 If MsgBox("Voulez-vous fermer votre session SAP ?", vbYesNo, "Fermeture de la session SAP") = vbYes Then
     fermetureSAP
 End If
+
 End Sub
