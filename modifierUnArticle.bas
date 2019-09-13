@@ -19,13 +19,13 @@ fichier = ThisWorkbook.Name
 Workbooks(fichier).Activate
 article = ActiveSheet.Range("B" & i).Value
 
-Load UserForm1 'créer l'UserForm, mais pas l'afficher
-UserForm1.TextBox1 = article
+Load UserForm3 'créer l'UserForm, mais pas l'afficher
+UserForm3.TextBox1 = article
 
 MsgBox ("Choisissez la modification à faire !")
 
 Workbooks(fichier).Activate
-UserForm1.Show
+UserForm3.Show
 
 'On Error GoTo errHandler
 
@@ -61,7 +61,7 @@ session.findById("wnd[0]/tbar[0]/btn[0]").press
 '[BUG]
 Dim typePlan As String
 
-If UserForm1.OptionButton1 = True Then 'Designation
+If UserForm3.OptionButton1 = True Then 'Designation
     
     '-------- Modifier Article (Données de base, CMS - CMS) --------
     Dim designation As String
@@ -72,7 +72,7 @@ If UserForm1.OptionButton1 = True Then 'Designation
     
     GoSub Enregistrer
     
-ElseIf UserForm1.OptionButton2 = True Then 'Texte de commande
+ElseIf UserForm3.OptionButton2 = True Then 'Texte de commande
 
     GoSub TexteDeCommande
     
@@ -85,7 +85,7 @@ ElseIf UserForm1.OptionButton2 = True Then 'Texte de commande
 
     GoSub Enregistrer
 
-ElseIf UserForm1.OptionButton3 = True Then 'Statut art. par div.
+ElseIf UserForm3.OptionButton3 = True Then 'Statut art. par div.
 
     GoSub MRP1
     
@@ -103,7 +103,7 @@ ElseIf UserForm1.OptionButton3 = True Then 'Statut art. par div.
         GoSub Enregistrer
     End If
     
-ElseIf UserForm1.OptionButton4 = True Then 'Type planification
+ElseIf UserForm3.OptionButton4 = True Then 'Type planification
     
     GoSub MRP1
     
@@ -140,7 +140,7 @@ ElseIf UserForm1.OptionButton4 = True Then 'Type planification
         GoSub Enregistrer
     End If
 
-ElseIf UserForm1.OptionButton5 = True Then 'Point de commande
+ElseIf UserForm3.OptionButton5 = True Then 'Point de commande
 
     GoSub MRP1
     
@@ -158,7 +158,7 @@ ElseIf UserForm1.OptionButton5 = True Then 'Point de commande
         GoSub Enregistrer
     End If
          
-ElseIf UserForm1.OptionButton6 = True Then 'Valeur arrondie
+ElseIf UserForm3.OptionButton6 = True Then 'Valeur arrondie
 
     GoSub MRP1
     
@@ -176,7 +176,7 @@ ElseIf UserForm1.OptionButton6 = True Then 'Valeur arrondie
         GoSub Enregistrer
     End If
 
-ElseIf UserForm1.OptionButton7 = True Then 'Délai livrai
+ElseIf UserForm3.OptionButton7 = True Then 'Délai livrai
 
     GoSub MRP1
     
@@ -194,7 +194,7 @@ ElseIf UserForm1.OptionButton7 = True Then 'Délai livrai
         GoSub Enregistrer
     End If
 
-ElseIf UserForm1.OptionButton8 = True Then 'Clé calc. taille lot
+ElseIf UserForm3.OptionButton8 = True Then 'Clé calc. taille lot
 
     GoSub MRP1
 
@@ -232,7 +232,7 @@ ElseIf UserForm1.OptionButton8 = True Then 'Clé calc. taille lot
         GoSub Enregistrer
     End If
 
-ElseIf UserForm1.OptionButton9 = True Then 'Numéro pce. fabricant
+ElseIf UserForm3.OptionButton9 = True Then 'Numéro pce. fabricant
 
     GoSub Achats
     
@@ -245,7 +245,7 @@ ElseIf UserForm1.OptionButton9 = True Then 'Numéro pce. fabricant
 
     GoSub Enregistrer
     
-ElseIf UserForm1.OptionButton10 = True Then 'Emplacement
+ElseIf UserForm3.OptionButton10 = True Then 'Emplacement
     
     GoSub DonneesGenDivStockage
     
@@ -263,7 +263,7 @@ ElseIf UserForm1.OptionButton10 = True Then 'Emplacement
 
     GoSub Enregistrer
 
-ElseIf UserForm1.OptionButton11 = True Then 'Grp Acheteur
+ElseIf UserForm3.OptionButton11 = True Then 'Grp Acheteur
 
     GoSub Achats
     
@@ -276,7 +276,7 @@ ElseIf UserForm1.OptionButton11 = True Then 'Grp Acheteur
     
     GoSub Enregistrer
     
-ElseIf UserForm1.OptionButton17 = True Then 'Gestionnaire
+ElseIf UserForm3.OptionButton17 = True Then 'Gestionnaire
 
     GoSub MRP1
     
@@ -294,7 +294,7 @@ ElseIf UserForm1.OptionButton17 = True Then 'Gestionnaire
         GoSub Enregistrer
     End If
 
-ElseIf UserForm1.OptionButton12 = True Then 'Cle Horizon
+ElseIf UserForm3.OptionButton12 = True Then 'Cle Horizon
 
     GoSub MRP1
 
@@ -312,7 +312,7 @@ ElseIf UserForm1.OptionButton12 = True Then 'Cle Horizon
         GoSub Enregistrer
     End If
 
-ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
+ElseIf UserForm3.OptionButton13 = True Then 'Grp Marchandise
 
     '-------- Modifier Article (Données de base, CMS - CMS) --------
     Dim grpMarchandise As String
@@ -323,7 +323,7 @@ ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
 
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
         MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermé !")
-        Unload UserForm1
+        Unload UserForm3
         fermetureSAP
         Exit Sub
     End If
@@ -335,9 +335,9 @@ ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
 
     GoSub Enregistrer
     
-ElseIf UserForm1.OptionButton14 = True Then 'Controle Dispo
+ElseIf UserForm3.OptionButton14 = True Then 'Controle Dispo
 
-    GoSub mrp2
+    GoSub MRP2
     
     '-------- Modifier article (MRP 2, CMS - CMS) --------
     Dim controleDispo As String
@@ -348,7 +348,7 @@ ElseIf UserForm1.OptionButton14 = True Then 'Controle Dispo
 
     GoSub Enregistrer
 
-ElseIf UserForm1.OptionButton15 = True Then 'Type magasin pour SM
+ElseIf UserForm3.OptionButton15 = True Then 'Type magasin pour SM
 
     GoSub GestionEmplacementsMagasin
     
@@ -361,7 +361,7 @@ ElseIf UserForm1.OptionButton15 = True Then 'Type magasin pour SM
     
     GoSub Enregistrer
 
-ElseIf UserForm1.OptionButton16 = True Then 'Type magasin EM
+ElseIf UserForm3.OptionButton16 = True Then 'Type magasin EM
 
     GoSub GestionEmplacementsMagasin
     
@@ -376,7 +376,7 @@ ElseIf UserForm1.OptionButton16 = True Then 'Type magasin EM
     
 End If
 
-Unload UserForm1
+Unload UserForm3
 
 'Sauvegarder
 Workbooks(fichier).Save
@@ -393,7 +393,7 @@ Exit Sub
 Enregistrer:
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
         MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermée !")
-        Unload UserForm1
+        Unload UserForm3
         fermetureSAP
         Exit Sub
     End If
@@ -408,7 +408,7 @@ Enregistrer:
 Enregistrer2:
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
         MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermée !")
-        Unload UserForm1
+        Unload UserForm3
         fermetureSAP
         Exit Sub
     End If
@@ -442,7 +442,7 @@ MRP1:
     
     Return  'Retour
 
-mrp2:
+MRP2:
     GoSub MRP1
     
     '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -456,7 +456,7 @@ mrp2:
     Return  'Retour
 
 DonneesGenDivStockage:
-    GoSub mrp2
+    GoSub MRP2
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
@@ -464,7 +464,7 @@ DonneesGenDivStockage:
     Return
 
 GestionEmplacementsMagasin:
-    GoSub mrp2
+    GoSub MRP2
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press

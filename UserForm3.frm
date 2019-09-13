@@ -1,14 +1,14 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm1 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm3 
    Caption         =   "Modifier des données de article"
    ClientHeight    =   5445
    ClientLeft      =   45
    ClientTop       =   390
    ClientWidth     =   7380
-   OleObjectBlob   =   "UserForm1.frx":0000
+   OleObjectBlob   =   "UserForm3.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
-Attribute VB_Name = "UserForm1"
+Attribute VB_Name = "UserForm3"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -31,14 +31,24 @@ End Sub
 
 Private Sub UserForm_Initialize()
 
-Dim ctrl As Control
-
 'Désélectionner les options
-For Each ctrl In UserForm1.Controls
-    If TypeName(ctrl) = "CheckBox" Then
-        ctrl.Value = False
-    End If
-Next ctrl
+OptionButton1.Value = False
+OptionButton2.Value = False
+OptionButton3.Value = False
+OptionButton4.Value = False
+OptionButton5.Value = False
+OptionButton6.Value = False
+OptionButton7.Value = False
+OptionButton8.Value = False
+OptionButton9.Value = False
+OptionButton10.Value = False
+OptionButton11.Value = False
+OptionButton12.Value = False
+OptionButton13.Value = False
+OptionButton14.Value = False
+OptionButton15.Value = False
+OptionButton16.Value = False
+OptionButton17.Value = False
 
 TextBox1.SetFocus
 

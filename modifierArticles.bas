@@ -15,6 +15,7 @@ Dim article As String, fichier As String, i As Integer, fin As String, ref As St
 
 fichier = ThisWorkbook.Name
 fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
+fin = 6
 
 Workbooks(fichier).Activate
 ref = 4 'Reférence pour sauvegarder le niveau de organization
@@ -47,32 +48,105 @@ session.findById("wnd[1]/usr/ctxtRMMG1-WERKS").Text = division
 session.findById("wnd[1]/usr/ctxtRMMG1-LGORT").Text = magasin
 session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
 session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
-session.findById("wnd[1]/tbar[0]/btn[13]").press 'Sauvegarder comme paramétrage
+session.findById("wnd[1]/tbar[0]/btn[5]").press 'Sélection des vues
+
+'Selection des vues
+session.findById("wnd[1]/tbar[0]/btn[19]").press 'Demarquer tout
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'Données de base
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(2).Selected = True 'Achats
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(3).Selected = True 'Texte de commande
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(4).Selected = True 'MRP 1
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(5).Selected = True 'MRP 2
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(6).Selected = True 'Données gén. div./stockage
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(7).Selected = True 'Gestion emplacements magasin
+session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(8).Selected = True 'Comptabilité
+session.findById("wnd[1]/tbar[0]/btn[14]").press 'Sauvegarder comme paramétrage
+session.findById("wnd[1]").Close 'Fermer fenêtre
 
 session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour (F3)
-session.findById("wnd[0]/tbar[0]/btn[3]").press
 
 compteur = 0
 
+Load UserForm1 'créer l'UserForm, mais pas l'afficher
+UserForm1.TextBox1 = article
+Workbooks(fichier).Activate
+UserForm1.TextBox2 = ActiveSheet.Range("B" & fin).Value
+MsgBox ("Choisissez les modifications à faire pour tous les articles!")
+UserForm1.Show
+
+'Si l'utilisateur n'est pas choisi des options
+Dim ctrl As Control, flag As Integer
+flag = False
+
+For Each ctrl In UserForm1.Controls
+    If TypeName(ctrl) = "CheckBox" Then
+        If ctrl.Value = True Then
+            flag = True
+        End If
+    End If
+Next ctrl
+
+If flag = False Then
+    MsgBox ("Vous n'avez pas choisi faire des modifications ! La session SAP sera fermée !")
+    Unload UserForm1
+    fermetureSAP
+    Exit Sub
+End If
+
+'Demander des entrees
+Const qteOptions As Integer = 17
+Dim entrees(1 To 17) As String, variable(1 To 17) As String
+
+variable(1) = "de la designation"
+variable(2) = "du texte de commande"
+variable(3) = "du statut art. par div."
+variable(4) = "du type de planification"
+variable(5) = "de la designation"
+variable(6) = "du texte de commande"
+variable(7) = "du delai livrais"
+variable(8) = "de la clé calc. taille lot"
+variable(9) = "de la designation"
+variable(10) = "de l'emplacement"
+variable(11) = "du groupe acheteur"
+variable(12) = "du gestionnaire"
+variable(13) = "de la clé horizon"
+variable(14) = "du groupe merchandise"
+variable(15) = "du controle Dispo"
+variable(16) = "du type magasin pour SM"
+variable(17) = "du type magasin EM"
+
+For i = 1 To 17
+    
+    If UserForm1.Controls("CheckBox" & i).Value = True Then
+        entrees(i) = InputBox("Ecrivez la nouvelle valeur " + variable(i) + " pour les articles :")
+    End If
+
+Next i
+
+
+'Boucle pour faire des modifications
 For i = 4 To fin
 
     Workbooks(fichier).Activate
     article = ActiveSheet.Range("B" & i).Value
     
-    Load UserForm1 'créer l'UserForm, mais pas l'afficher
-    UserForm1.TextBox1 = article
-    MsgBox ("Choisissez la modification à faire !")
-    UserForm1.Show
+'    Load UserForm1 'créer l'UserForm, mais pas l'afficher
+'    UserForm1.TextBox1 = article
+'    MsgBox ("Choisissez la modification à faire !")
+'    UserForm1.Show
     
-    '-------- Barre de recherche --------
-    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm02"
-    session.findById("wnd[0]").sendVKey 0
+'    '-------- Barre de recherche --------
+'    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm02"
+'    session.findById("wnd[0]").sendVKey 0
+'
+'    '-------- Modifier Article (Ecran initial) --------
+'    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article
+'    session.findById("wnd[0]/tbar[0]/btn[0]").press
     
-    '-------- Modifier Article (Ecran initial) --------
-    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article
-    session.findById("wnd[0]/tbar[0]/btn[0]").press
-
-    If UserForm1.OptionButton1 = True Then 'Designation
+    'Vérifier quelles modification à faire
+    If UserForm1.CheckBox1 = True Then 'Designation
+        
+        GoSub RechercherArticle
         
         '-------- Modifier Article (Données de base, CMS - CMS) --------
         Dim designation As String
@@ -80,11 +154,14 @@ For i = 4 To fin
         valeur = InputBox("La designation du article " & article & " est : " & designation & Chr(13) _
         & "Ecrivez la nouvelle designation : ")
         session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:8001/tblSAPLMGD1TC_KTXT/txtSKTEXT-MAKTX[1,0]").Text = valeur
-        
+
         GoSub Enregistrer
         
-    ElseIf UserForm1.OptionButton2 = True Then 'Texte de commande
-
+    End If
+        
+   If UserForm1.CheckBox2 = True Then 'Texte de commande
+   
+        GoSub RechercherArticle
         GoSub TexteDeCommande
         
         '-------- Modifier Article (Texte de commande, CMS - CMS) --------
@@ -95,9 +172,12 @@ For i = 4 To fin
         session.findById("wnd[0]/usr/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text = valeur
     
         GoSub Enregistrer
+        
+    End If
 
-    ElseIf UserForm1.OptionButton3 = True Then 'Statut art. par div.
+    If UserForm1.CheckBox3 = True Then 'Statut art. par div.
 
+        GoSub RechercherArticle
         GoSub MRP1
         
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -114,8 +194,11 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
         
-    ElseIf UserForm1.OptionButton4 = True Then 'Type planification
+    End If
+        
+    If UserForm1.CheckBox4 = True Then 'Type planification
     
+        GoSub RechercherArticle
         GoSub MRP1
         
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -151,8 +234,11 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton5 = True Then 'Point de commande
+    End If
     
+    If UserForm1.CheckBox5 = True Then 'Point de commande
+    
+        GoSub RechercherArticle
         GoSub MRP1
         
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -169,8 +255,11 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
          
-    ElseIf UserForm1.OptionButton6 = True Then 'Valeur arrondie
+    End If
     
+    If UserForm1.CheckBox6 = True Then 'Valeur arrondie
+    
+        GoSub RechercherArticle
         GoSub MRP1
         
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -186,9 +275,12 @@ For i = 4 To fin
         Else
             GoSub Enregistrer
         End If
+        
+    End If
 
-    ElseIf UserForm1.OptionButton7 = True Then 'Délai livrai
+    If UserForm1.CheckBox7 = True Then 'Délai livrai
     
+        GoSub RechercherArticle
         GoSub MRP1
         
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -205,8 +297,11 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton8 = True Then 'Clé calc. taille lot
+    End If
     
+    If UserForm1.CheckBox8 = True Then 'Clé calc. taille lot
+    
+        GoSub RechercherArticle
         GoSub MRP1
     
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -243,8 +338,11 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton9 = True Then 'Numéro pce. fabricant
+    End If
     
+    If UserForm1.CheckBox9 = True Then 'Numéro pce. fabricant
+    
+        GoSub RechercherArticle
         GoSub Achats
         
         '-------- Modifier Article (Achats, CMS - CMS) --------
@@ -256,8 +354,11 @@ For i = 4 To fin
     
         GoSub Enregistrer
     
-    ElseIf UserForm1.OptionButton10 = True Then 'Emplacement
+    End If
+    
+    If UserForm1.CheckBox10 = True Then 'Emplacement
         
+        GoSub RechercherArticle
         GoSub DonneesGenDivStockage
         
         '-------- Modifier Article (Données gén. div./stockage, CMS - CMS) --------
@@ -274,8 +375,11 @@ For i = 4 To fin
     
         GoSub Enregistrer
 
-    ElseIf UserForm1.OptionButton11 = True Then 'Grp Acheteur
+    End If
     
+    If UserForm1.CheckBox11 = True Then 'Grp Acheteur
+    
+        GoSub RechercherArticle
         GoSub Achats
         
         '-------- Modifier Article (Achats, CMS - CMS) --------
@@ -287,8 +391,11 @@ For i = 4 To fin
         
         GoSub Enregistrer
     
-    ElseIf UserForm1.OptionButton17 = True Then 'Gestionnaire
+    End If
     
+    If UserForm1.CheckBox12 = True Then 'Gestionnaire
+    
+        GoSub RechercherArticle
         GoSub MRP1
         
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -305,8 +412,11 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton12 = True Then 'Cle Horizon
+    End If
     
+    If UserForm1.CheckBox13 = True Then 'Cle Horizon
+    
+        GoSub RechercherArticle
         GoSub MRP1
     
         '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -323,7 +433,11 @@ For i = 4 To fin
             GoSub Enregistrer
         End If
 
-    ElseIf UserForm1.OptionButton13 = True Then 'Grp Marchandise
+    End If
+    
+    If UserForm1.CheckBox14 = True Then 'Grp Marchandise
+    
+        GoSub RechercherArticle
     
         '-------- Modifier Article (Données de base, CMS - CMS) --------
         Dim grpMarchandise As String
@@ -346,9 +460,12 @@ For i = 4 To fin
     
         GoSub Enregistrer
     
-    ElseIf UserForm1.OptionButton14 = True Then 'Controle Dispo
+    End If
     
-        GoSub mrp2
+    If UserForm1.CheckBox15 = True Then 'Controle Dispo
+    
+        GoSub RechercherArticle
+        GoSub MRP2
         
         '-------- Modifier article (MRP 2, CMS - CMS) --------
         Dim controleDispo As String
@@ -359,8 +476,11 @@ For i = 4 To fin
     
         GoSub Enregistrer
 
-    ElseIf UserForm1.OptionButton15 = True Then 'Type magasin pour SM
+    End If
     
+    If UserForm1.CheckBox16 = True Then 'Type magasin pour SM
+    
+        GoSub RechercherArticle
         GoSub GestionEmplacementsMagasin
         
         '-------- Modifier Article (Gestion emplacements Masagin, CMS - CMS) --------
@@ -372,8 +492,11 @@ For i = 4 To fin
         
         GoSub Enregistrer
 
-    ElseIf UserForm1.OptionButton16 = True Then 'Type magasin EM
+    End If
     
+    If UserForm1.CheckBox17 = True Then 'Type magasin EM
+    
+        GoSub RechercherArticle
         GoSub GestionEmplacementsMagasin
         
         '-------- Modifier Article (Gestion emplacements Masagin, CMS - CMS) --------
@@ -384,13 +507,15 @@ For i = 4 To fin
         session.findById("wnd[0]/usr/subSUB4:SAPLMGD1:2733/ctxtMLGN-LTKZE").Text = valeur
         
         GoSub Enregistrer
-        
+    
     End If
     
-    Unload UserForm1
+'    Unload UserForm1
     compteur = compteur + 1
     
 Next i
+
+Unload UserForm1
 
 'Sauvegarder
 Workbooks(fichier).Save
@@ -404,6 +529,17 @@ End If
 
 Exit Sub
 
+RechercherArticle:
+    '-------- Barre de recherche --------
+    session.findById("wnd[0]/tbar[0]/okcd").Text = "mm02"
+    session.findById("wnd[0]").sendVKey 0
+    
+    '-------- Modifier Article (Ecran initial) --------
+    session.findById("wnd[0]/usr/ctxtRMMG1-MATNR").Text = article
+    session.findById("wnd[0]/tbar[0]/btn[0]").press
+    
+    Return
+
 Enregistrer:
     If StrPtr(valeur) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenetre
         MsgBox ("Vous avez annulé l'opération ! La session SAP sera fermée !")
@@ -414,6 +550,7 @@ Enregistrer:
     
     session.findById("wnd[0]/tbar[0]/btn[11]").press 'Sauvegarder (on retourne à l'ecran initial)
     session.findById("wnd[0]/tbar[0]/btn[3]").press 'Retour
+    
     Return
 
 '[BUG]
@@ -454,7 +591,7 @@ MRP1:
     
     Return
 
-mrp2:
+MRP2:
     GoSub MRP1
     
     '-------- Modifier Article (MRP1, CMS - CMS) --------
@@ -468,7 +605,7 @@ mrp2:
     Return
 
 DonneesGenDivStockage:
-    GoSub mrp2
+    GoSub MRP2
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
@@ -476,7 +613,7 @@ DonneesGenDivStockage:
     Return
 
 GestionEmplacementsMagasin:
-    GoSub mrp2
+    GoSub MRP2
     
     '-------- Modifier Article (MRP2, CMS - CMS) --------
     session.findById("wnd[0]/tbar[1]/btn[18]").press
