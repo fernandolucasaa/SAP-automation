@@ -18,7 +18,7 @@ Sub creerArticles_SAPPE1()
 logonSAP 'Se connecter au SAP
 
 '_________________________________________________________________________________________________'
-                'Créer des articles
+                'CrÃ©er des articles
             
 Dim fichierDevis As String, fichier As String, chemin As String
 Dim premier As Integer, dernier As Integer, i As Integer, compteur As Integer, j As Integer
@@ -31,7 +31,7 @@ premier = Selection.Row
 dernier = premier + Selection.Rows.Count - 1
 compteur = 0
 
-'Faire une boucle pour créer tous les articles selectionnés de chaque fichier
+'Faire une boucle pour crÃ©er tous les articles selectionnÃ©s de chaque fichier
 For i = premier To dernier
 
     Windows(fichier).Activate
@@ -52,21 +52,21 @@ For i = premier To dernier
         End If
     Next ws
     
-    'Faire une boucle pour créer tous les articles d'un même fichier
+    'Faire une boucle pour crÃ©er tous les articles d'un mÃªme fichier
     For j = 1 To qteFeuils
     
         '-------- Barre de recherche --------
         session.findById("wnd[0]/tbar[0]/okcd").Text = "mm01"
         session.findById("wnd[0]").sendVKey 0
     
-        '-------- Créer article (Ecran initial) --------
+        '-------- CrÃ©er article (Ecran initial) --------
         session.findById("wnd[0]/usr/cmbRMMG1-MBRSH").Key = "A" 'Branche : Construct. industrielles
         session.findById("wnd[0]/usr/cmbRMMG1-MTART").Key = "FATE" 'Type d'article : FORNITURE ATELIER
         session.findById("wnd[0]").sendVKey 0 'Enter
     
-        'Sélection des vues
-        session.findById("wnd[1]/tbar[0]/btn[19]").press 'Effacer la sélection
-        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'Données de base 1
+        'SÃ©lection des vues
+        session.findById("wnd[1]/tbar[0]/btn[19]").press 'Effacer la sÃ©lection
+        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'DonnÃ©es de base 1
         session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(8).Selected = True 'Achats
         session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(10).Selected = True 'Texte de commande d'achat
         session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(11).Selected = True 'Planification des besoins 1
@@ -74,9 +74,9 @@ For i = premier To dernier
         session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(13).Selected = True 'Planification des besoins 3
         session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(14).Selected = True 'Planification des besoins 4
         session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").verticalScrollbar.position = 15 'Ajuster la position du scroll
-        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(16).Selected = True 'Données gén. divs./stockage 1
-        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(17).Selected = True 'Données gén. divs./stockage 2
-        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(21).Selected = True 'Comptabilité 1
+        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(16).Selected = True 'DonnÃ©es gÃ©n. divs./stockage 1
+        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(17).Selected = True 'DonnÃ©es gÃ©n. divs./stockage 2
+        session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(21).Selected = True 'ComptabilitÃ© 1
         session.findById("wnd[1]/tbar[0]/btn[0]").press 'Enter
         
         'Nvx organisationnels
@@ -89,7 +89,7 @@ For i = premier To dernier
         session.findById("wnd[2]/usr/txtMARA-MFRPN").Text = article
         session.findById("wnd[2]/tbar[0]/btn[2]").press
     
-        '-------- Créer article (Données de base 1) --------
+        '-------- CrÃ©er article (DonnÃ©es de base 1) --------
         Dim designation As String, qteBase As String, grpeMarchand As String, statArt As String, articleReparable As String
       
         designation = Workbooks(fichierDevis).Worksheets("FATE_" & j).Range("C20").Value 'Designation SAP
@@ -109,7 +109,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP01/ssubTABFRA1:SAPLMGMM:2004/subSUB4:SAPLMGD1:2001/ctxtMARA-MSTAE").Text = statArt
         session.findById("wnd[0]").sendVKey 0 'Enter
     
-        '-------- Créer article (Achats) --------
+        '-------- CrÃ©er article (Achats) --------
         Dim grpAcheteurs As String, cleAchats As String, tempsReception As String
         
         grpAcheteurs = "T0A"
@@ -124,7 +124,7 @@ For i = premier To dernier
         session.findById("wnd[0]").sendVKey 0
         session.findById("wnd[0]").sendVKey 0 'Confirmer
     
-        '-------- Créer article (Texte commande de achat) --------
+        '-------- CrÃ©er article (Texte commande de achat) --------
         Dim texteCommande As String, fornisseur As String, equipBase As String, equipCompl As String, reference As String
         
         designation = Workbooks(fichierDevis).Worksheets("FATE_" & j).Range("C20").Value 'Designation SAP
@@ -138,7 +138,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP11/ssubTABFRA1:SAPLMGMM:2010/subSUB2:SAPLMGD1:2321/cntlLONGTEXT_BESTELL/shellcont/shell").Text = texteCommande
         session.findById("wnd[0]").sendVKey 0
     
-        '-------- Créer article (Planif. des besions 1) -------
+        '-------- CrÃ©er article (Planif. des besions 1) -------
         Dim codeABC As String, typePlan As String, ptCommande As String, grpPlanif As String, cleTailleLot As String, gestionnaire As String
         Dim tailleLotFixe As String
         
@@ -165,7 +165,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP12/ssubTABFRA1:SAPLMGMM:2000/subSUB4:SAPLMGD1:2483/txtMARC-BSTFE").Text = tailleLotFixe
         session.findById("wnd[0]").sendVKey 0
     
-        '-------- Créer article (Planif. des besions 2) -------
+        '-------- CrÃ©er article (Planif. des besions 2) -------
         Dim typeApprov As String, magProduction As String, utilisationQuotas As String, magApproExt As String, delaiLivrais As String
         Dim cleHorizon As String
         
@@ -184,7 +184,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP13/ssubTABFRA1:SAPLMGMM:2000/subSUB3:SAPLMGD1:2485/ctxtMARC-FHORI").Text = cleHorizon
         session.findById("wnd[0]").sendVKey 0
     
-        '-------- Créer article (Planif. des besions 3) -------
+        '-------- CrÃ©er article (Planif. des besions 3) -------
         Dim controleDispo As String
         
         controleDispo = "02"
@@ -192,7 +192,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP14/ssubTABFRA1:SAPLMGMM:2000/subSUB4:SAPLMGD1:2493/ctxtMARC-MTVFP").Text = controleDispo
         session.findById("wnd[0]").sendVKey 0
         
-        '-------- Créer article (Planif. des besions 4) -------
+        '-------- CrÃ©er article (Planif. des besions 4) -------
         Dim indivCollectif As String
         
         indivCollectif = "2"
@@ -200,7 +200,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP15/ssubTABFRA1:SAPLMGMM:2000/subSUB2:SAPLMGD1:2495/ctxtMARC-SBDKZ").Text = indivCollectif
         session.findById("wnd[0]").sendVKey 0
     
-        '-------- Créer article (Donn.div./stockage 1) -------
+        '-------- CrÃ©er article (Donn.div./stockage 1) -------
         Dim emplacement As String
         
         emplacement = "CREA_FATE"
@@ -208,7 +208,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP19/ssubTABFRA1:SAPLMGMM:2000/subSUB2:SAPLZMGD1:2701/txtMARD-LGPBE").Text = emplacement
         session.findById("wnd[0]").sendVKey 0
     
-        '-------- Créer article (Donn.div./stockage 2) -------
+        '-------- CrÃ©er article (Donn.div./stockage 2) -------
         Dim centreProfit As String
         
         centreProfit = "FR10COMM"
@@ -216,7 +216,7 @@ For i = premier To dernier
         session.findById("wnd[0]/usr/tabsTABSPR1/tabpSP20/ssubTABFRA1:SAPLMGMM:2000/subSUB3:SAPLMGD1:5801/ctxtMARC-PRCTR").Text = centreProfit
         session.findById("wnd[0]").sendVKey 0
     
-        '-------- Créer article (Comptabilité 1) -------
+        '-------- CrÃ©er article (ComptabilitÃ© 1) -------
         Dim classeValoris As String, clValorCdeClt As String, clValProjet As String, prixStandard As String
         
         classeValoris = "02"
@@ -248,13 +248,12 @@ For i = premier To dernier
 Next i
 
 '_________________________________________________________________________________________________'
-                    'Fin de la création de l'article
+                    'Fin de la crÃ©ation de l'article
 
-MsgBox ("La création des articles est finie ! Vous avez créé " + compteur + " articles !")
+MsgBox ("La crÃ©ation des articles est finie ! Vous avez crÃ©Ã© " + compteur + " articles !")
 
 'Fermeture de la connexion
 If MsgBox("Voulez-vous fermer votre session SAP ?", vbYesNo, "Fermeture de la session SAP") = vbYes Then
     fermetureSAP
 End If
-
 End Sub
