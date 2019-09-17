@@ -1,7 +1,7 @@
 Attribute VB_Name = "connexionSAP"
 Option Explicit
 
-Global session, wnd0, userArea, menuBar, statusBar, toolBar0
+Global wnd0, userArea, menuBar, statusBar, toolBar0
 
 'Faire la connexion avec SAP, c'est-à-dire ouvrir et fermer une session
 
@@ -62,13 +62,13 @@ connexion:
 identifiant = "ng2b23d"
 motDePasse = "RPS08201"
 
-'identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "Connexion SAP")
+identifiant = InputBox("Ecrivez votre identifiant de l'utilisateur", "Connexion SAP")
 If StrPtr(identifiant) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenêtre
     MsgBox ("Vous avez annulé l'opération !")
     End 'Arrête tous les procedures en exécution
 End If
 
-'motDePasse = InputBox("Ecrivez votre mot de passe", "Connexion SAP")
+motDePasse = InputBox("Ecrivez votre mot de passe", "Connexion SAP")
 If StrPtr(motDePasse) = 0 Then 'Cliquer sur 'Annuler' ou fermer la fenêtre
     MsgBox ("Vous avez annulé l'opération !")
     End
