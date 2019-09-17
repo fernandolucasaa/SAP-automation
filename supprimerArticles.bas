@@ -1,4 +1,6 @@
 Attribute VB_Name = "supprimerArticles"
+Option Explicit
+
 'Faire la suppression des articles en trois étapes : Emplacement, Transfert, Suppression
 
 Sub supprimerArticles_SAP()
