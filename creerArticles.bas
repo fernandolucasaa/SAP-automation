@@ -1,8 +1,10 @@
 Attribute VB_Name = "creerArticles"
 Option Explicit
 
-'Créer tous les article du fichier. L'utilisateur doit confirmer la bonne création des articles à
-'chaque n creations
+Global session
+
+'Créer tous les article du fichier. L'utilisateur doit confirmer la bonne création des articles pour
+'les premiers n articles créés
 'Créer des articles pour Nantes et Saint-Nazaire
 
 Sub creerArticles_SAP()
@@ -11,17 +13,21 @@ logonSAP 'Se connecter au SAP
 
 '_________________________________________________________________________________________________'
                     'Creer une article
-Dim fichier As String, article As String
+Dim fichier As String, article As String, ws As Worksheet
 Dim fin As Integer, compteur As Integer, limite As Integer, i As Integer
 
 fichier = ThisWorkbook.Name
+Set ws = Windows(fichier).ActiveSheet
 
-Workbooks(fichier).Activate
-fin = ActiveSheet.Cells(Rows.Count, 2).End(xlUp).Row
+fin = ws.Cells(Rows.Count, 2).End(xlUp).Row
 compteur = 0 'qté totale de articles crées
-limite = 4 'limite de vérification
+limite = 5 'limite de vérification
 
-For i = 4 To fin 'Les deux premieres lignes sont des exemples
+'On Error GoTo 0
+'Pour débugger le code il faut mettre la ligne en bas en commentaire
+On Error GoTo errHandler
+
+For i = 4 To fin
 
     '-------- Barre de recherche --------
     toolBar0.findById("okcd").Text = "mm01"
@@ -83,6 +89,9 @@ For i = 4 To fin 'Les deux premieres lignes sont des exemples
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(13).Selected = True 'Gestion emplacements magasin
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(15).Selected = True 'Comptabilité
     session.findById("wnd[1]/tbar[0]/btn[0]").press 'Suite
+    
+    'Vérification si le CMS utilisé est déjà créé
+    verifierCMS
 
     '-------- Créer article (Données de base, CMS - CMS) --------
     Dim designation As String
@@ -242,8 +251,39 @@ If MsgBox("Voulez-vous fermer votre session SAP ?", vbYesNo, "Fermeture de la se
     fermetureSAP
 End If
 
+Exit Sub
+
+errHandler:
+
+    MsgBox "Un erreur a été trouvé!" & Chr(13) & Chr(13) _
+    & "Numéro de l'erreur :        " & Err.Number & Chr(13) & Chr(13) _
+    & "Description de l'erreur :   " & Err.Description & Chr(13) & Chr(13) _
+    & "Status bar du SAP :         " & statusBar.Text, vbExclamation, "Erreur"
+    MsgBox "La procedure est finie !", vbExclamation
+    Exit Sub
+
+    Resume
+
 End Sub
 
+'Vérifier si numéro CMS est déjà créé
+Sub verifierCMS()
+
+If session.ActiveWindow.Type = "GuiModalWindow" Then 'fenêtre pop-up du SAP
+    
+    MsgBox "Une fenêtre pop-up s'affiche avec la message suivante : " & Chr(13) _
+    & "<< " & session.ActiveWindow.PopupDialogText & " >>" & Chr(13) _
+    & "La session SAP sera fermée !", vbExclamation, "Erreur"
+    session.findById(session.ActiveWindow.Name).Close 'wnd[2]
+    session.findById(session.ActiveWindow.Name).Close 'wnd[1]
+    fermetureSAP
+    End
+    
+End If
+
+End Sub
+
+'Vérifier les messages d'erreur dans le status bar
 Sub verifierErreur()
 
 Dim messageErreur As String
@@ -252,7 +292,7 @@ If (statusBar.MessageType = "E") Then
 
     messageErreur = statusBar.Text
     MsgBox ("L'erreur suivant a été créé : " & Chr(13) & "<<" & messageErreur & ">>." & Chr(13) _
-    & "La session SAP sera ferméé !")
+    & "La session SAP sera fermée !")
     fermetureSAP
     End
     
@@ -260,6 +300,7 @@ End If
 
 End Sub
 
+'Vérifier la bonne designation et texte de commande
 Function verifierEntree(valeur As String, variable As String, article As String, pos As Integer) As Boolean
 
 verifierEntree = True
