@@ -35,7 +35,7 @@ numeroMagasin = ws.Range("L" & ref).Value 'N18 ou (Z18)
 typeMagasin = ws.Range("M" & ref).Value 'NEN ou (Z62)
 
 'Sauvegarder le niveaux de organisation et la selection des vues
-Call enregistrerOrganisationEtVues(article, ref, division, magasin, numeroMagasin, typeMagasin)
+'Call enregistrerOrganisationEtVues(article, ref, division, magasin, numeroMagasin, typeMagasin)
 
 compteur = 0
 
@@ -548,7 +548,7 @@ session.findById("wnd[1]/usr/ctxtRMMG1-LGNUM").Text = numeroMagasin
 session.findById("wnd[1]/usr/ctxtRMMG1-LGTYP").Text = typeMagasin
 session.findById("wnd[1]/tbar[0]/btn[5]").press 'Sélection des vues
 
-'Selection des vues (attention : les options sont différents pour chaque division)
+'Selection des vues
 session.findById("wnd[1]/tbar[0]/btn[19]").press 'Demarquer tout
 
 If division = "NTF" Then 'Nantes
@@ -561,7 +561,7 @@ If division = "NTF" Then 'Nantes
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(6).Selected = True 'Données gén. div./stockage
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(7).Selected = True 'Gestion emplacements magasin
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(8).Selected = True 'Comptabilité
-    
+
 ElseIf (division = "NZF") Then
 
     session.findById("wnd[1]/usr/tblSAPLMGMMTC_VIEW").getAbsoluteRow(0).Selected = True 'Données de base
